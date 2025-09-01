@@ -46,6 +46,8 @@ export interface SparePart {
   currency: 'AED' | 'USD';
   isAvailable: boolean;
   supplierId?: string;
+  partNumber: string;
+  countryOfOrigin: string;
 }
 
 export interface SparePartCategory {
@@ -804,4 +806,64 @@ export const validateShippingFields = (
     isValid: Object.keys(errors).length === 0,
     errors
   };
+};
+
+// Validation functions for spare parts
+export const validateSparePart = (part: Omit<SparePart, 'id' | 'createdAt' | 'updatedAt'>, existingParts: SparePart[]): { isValid: boolean; errors: Record<string, string> } => {
+  const errors: Record<string, string> = {};
+
+  // Validate part number
+  if (!part.partNumber || part.partNumber.trim() === '') {
+    errors.partNumber = 'Part number is required';
+  } else if (part.partNumber.length < 3) {
+    errors.partNumber = 'Part number must be at least 3 characters long';
+  } else if (existingParts.some(p => p.partNumber === part.partNumber)) {
+    errors.partNumber = 'Part number must be unique';
+  }
+
+  // Validate name
+  if (!part.name || part.name.trim() === '') {
+    errors.name = 'Part name is required';
+  }
+
+  // Validate nameAr
+  if (!part.nameAr || part.nameAr.trim() === '') {
+    errors.nameAr = 'Arabic part name is required';
+  }
+
+  // Validate category
+  if (!part.category || part.category.trim() === '') {
+    errors.category = 'Category is required';
+  }
+
+  // Validate country of origin
+  if (!part.countryOfOrigin || part.countryOfOrigin.trim() === '') {
+    errors.countryOfOrigin = 'Country of origin is required';
+  }
+
+  // Validate price if provided
+  if (part.price !== undefined && (part.price < 0 || isNaN(part.price))) {
+    errors.price = 'Price must be a positive number';
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+};
+
+// Generate unique part number
+export const generatePartNumber = (category: string, existingParts: SparePart[]): string => {
+  const prefix = category.substring(0, 3).toUpperCase();
+  const timestamp = Date.now().toString().slice(-6);
+  let partNumber = `${prefix}-${timestamp}`;
+  
+  // Ensure uniqueness
+  let counter = 1;
+  while (existingParts.some(p => p.partNumber === partNumber)) {
+    partNumber = `${prefix}-${timestamp}-${counter}`;
+    counter++;
+  }
+  
+  return partNumber;
 };

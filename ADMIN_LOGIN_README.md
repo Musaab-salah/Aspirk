@@ -115,3 +115,5 @@ For multiple admin users, consider implementing a database with user management 
 - Modern browsers with localStorage support
 - Mobile browsers (iOS Safari, Chrome Mobile)
 - Desktop browsers (Chrome, Firefox, Safari, Edge)
+
+

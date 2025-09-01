@@ -4,15 +4,22 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import FontLoader from '@/components/FontLoader'
 
 const inter = Inter({ 
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+  fallback: ['system-ui', 'Arial', 'sans-serif'],
+  adjustFontFallback: true,
 })
 
 const notoSansArabic = Noto_Sans_Arabic({ 
   subsets: ['arabic'],
   variable: '--font-noto-sans-arabic',
+  display: 'swap',
+  fallback: ['Arial', 'sans-serif'],
+  adjustFontFallback: true,
 })
 
 export const metadata: Metadata = {
@@ -35,36 +42,38 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`${inter.variable} ${notoSansArabic.variable} font-english`}>
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-          <Header />
-          <main className="flex-1 pt-20 lg:pt-24">
-            {children}
-          </main>
-          <Footer />
-          <Toaster 
-            position="top-center"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-                borderRadius: '12px',
-                padding: '16px',
-                fontSize: '14px',
-              },
-              success: {
+        <FontLoader>
+          <div className="min-h-screen bg-gray-50 flex flex-col">
+            <Header />
+            <main className="flex-1 pt-20 lg:pt-24">
+              {children}
+            </main>
+            <Footer />
+            <Toaster 
+              position="top-center"
+              toastOptions={{
+                duration: 4000,
                 style: {
-                  background: '#10b981',
+                  background: '#363636',
+                  color: '#fff',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  fontSize: '14px',
                 },
-              },
-              error: {
-                style: {
-                  background: '#ef4444',
+                success: {
+                  style: {
+                    background: '#10b981',
+                  },
                 },
-              },
-            }}
-          />
-        </div>
+                error: {
+                  style: {
+                    background: '#ef4444',
+                  },
+                },
+              }}
+            />
+          </div>
+        </FontLoader>
       </body>
     </html>
   )

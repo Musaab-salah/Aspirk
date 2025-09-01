@@ -70,8 +70,40 @@ module.exports = {
         }
       },
       fontFamily: {
-        'arabic': ['Noto Sans Arabic', 'sans-serif'],
+        'arabic': ['IBM Plex Sans Arabic', 'Noto Sans Arabic', 'sans-serif'],
         'english': ['Inter', 'sans-serif'],
+        'arabic-alt': ['Noto Sans Arabic', 'IBM Plex Sans Arabic', 'sans-serif'],
+        'display': ['Inter', 'IBM Plex Sans Arabic', 'sans-serif'],
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+        'base': ['1rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '5xl': ['3rem', { lineHeight: '1' }],
+        '6xl': ['3.75rem', { lineHeight: '1' }],
+        '7xl': ['4.5rem', { lineHeight: '1' }],
+        '8xl': ['6rem', { lineHeight: '1' }],
+        '9xl': ['8rem', { lineHeight: '1' }],
+      },
+      lineHeight: {
+        'tight': '1.25',
+        'snug': '1.375',
+        'normal': '1.5',
+        'relaxed': '1.625',
+        'loose': '2',
+      },
+      letterSpacing: {
+        'tighter': '-0.05em',
+        'tight': '-0.025em',
+        'normal': '0em',
+        'wide': '0.025em',
+        'wider': '0.05em',
+        'widest': '0.1em',
       },
       direction: {
         'rtl': 'rtl',
@@ -88,11 +120,23 @@ module.exports = {
         'blob': 'blob 7s infinite',
         'float': 'float 6s ease-in-out infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-in-up': 'fadeInUp 0.6s ease-out',
+        'fade-in-down': 'fadeInDown 0.6s ease-out',
+        'slide-in-up': 'slideInUp 0.6s ease-out',
+        'slide-in-down': 'slideInDown 0.6s ease-out',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeInDown: {
+          '0%': { opacity: '0', transform: 'translateY(-20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         slideInFromTop: {
           '0%': { transform: 'translateY(-100%)', opacity: '0' },
@@ -109,6 +153,14 @@ module.exports = {
         slideInFromRight: {
           '0%': { transform: 'translateX(100%)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInUp: {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideInDown: {
+          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         scaleIn: {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
@@ -153,8 +205,131 @@ module.exports = {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 2px 10px -2px rgba(0, 0, 0, 0.05)',
+        'glow': '0 0 20px rgba(59, 130, 246, 0.3)',
+        'glow-success': '0 0 20px rgba(34, 197, 94, 0.3)',
+        'glow-warning': '0 0 20px rgba(245, 158, 11, 0.3)',
+        'glow-danger': '0 0 20px rgba(239, 68, 68, 0.3)',
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      },
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+        '90': '90',
+        '100': '100',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities, theme }) {
+      const newUtilities = {
+        '.text-balance': {
+          'text-wrap': 'balance',
+        },
+        '.text-pretty': {
+          'text-wrap': 'pretty',
+        },
+        '.font-feature-numeric': {
+          'font-feature-settings': '"tnum" 1, "lnum" 1',
+        },
+        '.font-feature-discretionary': {
+          'font-feature-settings': '"liga" 1, "dlig" 1',
+        },
+        '.font-feature-contextual': {
+          'font-feature-settings': '"calt" 1, "clig" 1',
+        },
+        '.font-feature-historical': {
+          'font-feature-settings': '"hist" 1',
+        },
+        '.font-feature-stylistic': {
+          'font-feature-settings': '"salt" 1, "swsh" 1',
+        },
+        '.font-feature-position': {
+          'font-feature-settings': '"subs" 1, "sups" 1',
+        },
+        '.font-feature-capitals': {
+          'font-feature-settings': '"case" 1, "cpsp" 1',
+        },
+        '.font-feature-numeric-fraction': {
+          'font-feature-settings': '"frac" 1',
+        },
+        '.font-feature-numeric-ordinal': {
+          'font-feature-settings': '"ordn" 1',
+        },
+        '.font-feature-numeric-slashed-zero': {
+          'font-feature-settings': '"zero" 1',
+        },
+        '.font-feature-numeric-proportional': {
+          'font-feature-settings': '"pnum" 1',
+        },
+        '.font-feature-numeric-tabular': {
+          'font-feature-settings': '"tnum" 1',
+        },
+        '.font-feature-numeric-oldstyle': {
+          'font-feature-settings': '"onum" 1',
+        },
+        '.font-feature-numeric-lining': {
+          'font-feature-settings': '"lnum" 1',
+        },
+        '.font-feature-numeric-diagonal': {
+          'font-feature-settings': '"diag" 1',
+        },
+        '.font-feature-numeric-stacked': {
+          'font-feature-settings': '"stack" 1',
+        },
+        '.font-feature-numeric-scientific': {
+          'font-feature-settings': '"sinf" 1',
+        },
+        '.font-feature-numeric-superscript': {
+          'font-feature-settings': '"sups" 1',
+        },
+        '.font-feature-numeric-subscript': {
+          'font-feature-settings': '"subs" 1',
+        },
+        '.font-feature-numeric-slashed-zero': {
+          'font-feature-settings': '"zero" 1',
+        },
+        '.font-feature-numeric-proportional': {
+          'font-feature-settings': '"pnum" 1',
+        },
+        '.font-feature-numeric-tabular': {
+          'font-feature-settings': '"tnum" 1',
+        },
+        '.font-feature-numeric-oldstyle': {
+          'font-feature-settings': '"onum" 1',
+        },
+        '.font-feature-numeric-lining': {
+          'font-feature-settings': '"lnum" 1',
+        },
+        '.font-feature-numeric-diagonal': {
+          'font-feature-settings': '"diag" 1',
+        },
+        '.font-feature-numeric-stacked': {
+          'font-feature-settings': '"stack" 1',
+        },
+        '.font-feature-numeric-scientific': {
+          'font-feature-settings': '"sinf" 1',
+        },
+        '.font-feature-numeric-superscript': {
+          'font-feature-settings': '"sups" 1',
+        },
+        '.font-feature-numeric-subscript': {
+          'font-feature-settings': '"subs" 1',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }

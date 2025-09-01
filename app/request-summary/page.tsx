@@ -16,13 +16,15 @@ const mockSpareParts: SparePart[] = [
     nameAr: 'فلتر الزيت',
     description: 'High quality oil filter for engine protection',
     descriptionAr: 'فلتر زيت عالي الجودة لحماية المحرك',
-    image: '/images/oil-filter.jpg',
+    image: '/images/air-filter.svg',
     category: 'Engine Parts',
     categoryAr: 'قطع المحرك',
     compatibleCars: ['1', '2', '3'],
     price: 45,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'OF-001',
+    countryOfOrigin: 'Germany',
   },
   {
     id: '2',
@@ -37,6 +39,8 @@ const mockSpareParts: SparePart[] = [
     price: 120,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'BP-002',
+    countryOfOrigin: 'Japan',
   },
   {
     id: '3',
@@ -51,6 +55,8 @@ const mockSpareParts: SparePart[] = [
     price: 35,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'AF-003',
+    countryOfOrigin: 'USA',
   },
 ]
 
@@ -365,9 +371,9 @@ export default function RequestSummaryPage() {
                   </h3>
                   <ShippingForm
                     shippingMethod={shippingMethod}
+                    setShippingMethod={setShippingMethod}
                     destinationCountry={destinationCountry}
-                    onShippingMethodChange={setShippingMethod}
-                    onDestinationCountryChange={setDestinationCountry}
+                    setDestinationCountry={setDestinationCountry}
                     validation={validation}
                     showValidation={showValidation}
                   />

@@ -6,7 +6,7 @@ import { MagnifyingGlassIcon, FunnelIcon, PhotoIcon } from '@heroicons/react/24/
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import SparePartCard from '@/components/SparePartCard'
-import { SparePart, SparePartCategory } from '@/types'
+import { SparePart, SparePartCategory, COUNTRIES } from '@/types'
 
 // Mock data - in real app this would come from API
 const sparePartsCategories: SparePartCategory[] = [
@@ -25,13 +25,15 @@ const mockSpareParts: SparePart[] = [
     nameAr: 'فلتر الزيت',
     description: 'High quality oil filter for engine protection',
     descriptionAr: 'فلتر زيت عالي الجودة لحماية المحرك',
-    image: '/images/oil-filter.jpg',
+    image: '/images/air-filter.svg',
     category: 'Engine Parts',
     categoryAr: 'قطع المحرك',
     compatibleCars: ['1', '2', '3'],
     price: 45,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'OF-001',
+    countryOfOrigin: 'Germany',
   },
   {
     id: '2',
@@ -46,6 +48,8 @@ const mockSpareParts: SparePart[] = [
     price: 120,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'BP-002',
+    countryOfOrigin: 'Japan',
   },
   {
     id: '3',
@@ -60,6 +64,8 @@ const mockSpareParts: SparePart[] = [
     price: 35,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'AF-003',
+    countryOfOrigin: 'USA',
   },
   {
     id: '4',
@@ -74,6 +80,8 @@ const mockSpareParts: SparePart[] = [
     price: 280,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'SA-004',
+    countryOfOrigin: 'Italy',
   },
   {
     id: '5',
@@ -88,6 +96,8 @@ const mockSpareParts: SparePart[] = [
     price: 450,
     currency: 'AED',
     isAvailable: true,
+    partNumber: 'BAT-005',
+    countryOfOrigin: 'South Korea',
   },
   {
     id: '6',
@@ -102,6 +112,8 @@ const mockSpareParts: SparePart[] = [
     price: 320,
     currency: 'AED',
     isAvailable: false,
+    partNumber: 'HL-006',
+    countryOfOrigin: 'China',
   },
 ]
 
@@ -112,6 +124,7 @@ export default function SparePartsPage() {
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [showAvailableOnly, setShowAvailableOnly] = useState(false)
   const [selectedParts, setSelectedParts] = useState<string[]>([])
+  const [countryFilter, setCountryFilter] = useState('')
 
   const brand = searchParams.get('brand')
   const model = searchParams.get('model')
@@ -128,8 +141,9 @@ export default function SparePartsPage() {
     const matchesPrice = (!priceRange.min || (part.price && part.price >= parseInt(priceRange.min))) &&
                         (!priceRange.max || (part.price && part.price <= parseInt(priceRange.max)))
     const matchesAvailability = !showAvailableOnly || part.isAvailable
+    const matchesCountry = !countryFilter || part.countryOfOrigin === countryFilter
 
-    return matchesCategory && matchesSearch && matchesPrice && matchesAvailability
+    return matchesCategory && matchesSearch && matchesPrice && matchesAvailability && matchesCountry
   })
 
   const handlePartToggle = (partId: string) => {
@@ -211,6 +225,25 @@ export default function SparePartsPage() {
                 </select>
               </div>
 
+              {/* Country Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">
+                  بلد المنشأ
+                </label>
+                <select
+                  value={countryFilter}
+                  onChange={(e) => setCountryFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
+                >
+                  <option value="">جميع البلدان</option>
+                  {COUNTRIES.map(country => (
+                    <option key={country.code} value={country.code}>
+                      {country.nameAr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Price Range */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">
@@ -256,6 +289,7 @@ export default function SparePartsPage() {
                   setSearchQuery('')
                   setPriceRange({ min: '', max: '' })
                   setShowAvailableOnly(false)
+                  setCountryFilter('')
                 }}
                 className="w-full px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 font-arabic"
               >
@@ -312,6 +346,28 @@ export default function SparePartsPage() {
           </div>
         </div>
       </div>
+
+      {/* Bottom CTA - Request Quote Button */}
+      {selectedParts.length > 0 && (
+        <div className="bg-white border-t border-gray-200 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 font-arabic">
+                جاهز لطلب عرض السعر؟
+              </h3>
+              <p className="text-gray-600 mb-6 font-arabic">
+                تم اختيار {selectedParts.length} قطعة غيار. اضغط على الزر أدناه للمتابعة
+              </p>
+              <button
+                onClick={handleRequestQuote}
+                className="btn-primary text-lg px-8 py-4 font-arabic shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                طلب عرض سعر
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

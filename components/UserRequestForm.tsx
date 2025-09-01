@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   UserIcon, 
-  CarIcon, 
   WrenchScrewdriverIcon, 
   TruckIcon, 
   CheckCircleIcon,
@@ -261,7 +260,7 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 animate-in fade-in duration-500">
             <div className="flex items-center mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-success-100 to-success-200 rounded-xl flex items-center justify-center ml-4">
-                <CarIcon className="h-6 w-6 text-success-600" />
+                <div className="h-6 w-6 text-success-600">🚗</div>
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 font-arabic">معلومات السيارة</h2>

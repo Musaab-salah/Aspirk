@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { CheckIcon, PhotoIcon, TagIcon } from '@heroicons/react/24/outline'
 import { SparePart } from '@/types'
 
 interface SparePartCardProps {
@@ -61,6 +61,19 @@ export default function SparePartCard({ part, isSelected, onToggle }: SparePartC
 
       {/* Content */}
       <div className="p-4">
+        {/* Part Number - Prominently displayed */}
+        <div className="mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <TagIcon className="h-4 w-4 text-primary-600" />
+              <span className="text-xs font-medium text-gray-600 font-arabic">رقم الجزء:</span>
+            </div>
+            <span className="text-sm font-mono font-bold text-primary-700 bg-white px-2 py-1 rounded border border-primary-200">
+              {part.partNumber}
+            </span>
+          </div>
+        </div>
+
         {/* Title */}
         <h3 className="text-lg font-semibold text-gray-900 mb-2 font-arabic">
           {part.nameAr}
