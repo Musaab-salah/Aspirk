@@ -132,6 +132,14 @@ export default function SparePartsPage() {
   const brand = searchParams.get('brand')
   const model = searchParams.get('model')
   const year = searchParams.get('year')
+  const searchParam = searchParams.get('search')
+
+  // Set search query from URL parameter
+  useEffect(() => {
+    if (searchParam) {
+      setSearchQuery(searchParam)
+    }
+  }, [searchParam])
 
   // Define the workflow steps
   const steps = [
@@ -176,7 +184,8 @@ export default function SparePartsPage() {
       part.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       part.nameAr.includes(searchQuery) ||
       part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      part.descriptionAr?.includes(searchQuery)
+      part.descriptionAr?.includes(searchQuery) ||
+      part.partNumber?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesPrice = (!priceRange.min || (part.price && part.price >= parseInt(priceRange.min))) &&
                         (!priceRange.max || (part.price && part.price <= parseInt(priceRange.max)))
     const matchesAvailability = !showAvailableOnly || part.isAvailable
@@ -229,6 +238,16 @@ export default function SparePartsPage() {
               السيارة المختارة: تويوتا كورولا 2016
             </p>
           )}
+          {searchQuery && (
+            <div className="mt-4 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+              <p className="text-primary-800 font-arabic">
+                🔍 نتائج البحث عن: <span className="font-semibold">{searchQuery}</span>
+                <span className="mr-2 text-sm text-primary-600">
+                  ({filteredParts.length} نتيجة)
+                </span>
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -250,9 +269,18 @@ export default function SparePartsPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="ابحث عن قطع الغيار..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
                   />
                   <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      title="مسح البحث"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -352,9 +380,16 @@ export default function SparePartsPage() {
           <div className="lg:col-span-3">
             {/* Results Header */}
             <div className="flex justify-between items-center mb-6">
-              <p className="text-gray-600 font-arabic">
-                {filteredParts.length} قطعة غيار متوفرة
-              </p>
+              <div>
+                <p className="text-gray-600 font-arabic">
+                  {filteredParts.length} قطعة غيار متوفرة
+                </p>
+                {searchQuery && (
+                  <p className="text-sm text-primary-600 font-arabic mt-1">
+                    🔍 نتائج البحث عن: {searchQuery}
+                  </p>
+                )}
+              </div>
               <div className="flex items-center space-x-4 space-x-reverse">
                 <span className="text-sm text-gray-600 font-arabic">
                   المختار: {selectedParts.length}
@@ -386,11 +421,22 @@ export default function SparePartsPage() {
               <div className="text-center py-12">
                 <PhotoIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2 font-arabic">
-                  لا توجد قطع غيار
+                  {searchQuery ? 'لا توجد نتائج للبحث' : 'لا توجد قطع غيار'}
                 </h3>
-                <p className="text-gray-600 font-arabic">
-                  جرب تغيير الفلاتر أو البحث بكلمات مختلفة
+                <p className="text-gray-600 font-arabic mb-4">
+                  {searchQuery 
+                    ? `لم نتمكن من العثور على نتائج لـ "${searchQuery}". جرب البحث بكلمات مختلفة أو استخدم رقم القطعة.`
+                    : 'جرب تغيير الفلاتر أو البحث بكلمات مختلفة'
+                  }
                 </p>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-arabic"
+                  >
+                    مسح البحث
+                  </button>
+                )}
               </div>
             )}
           </div>

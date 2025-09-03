@@ -21,66 +21,78 @@ interface PaymentMethod {
 
 const paymentMethods: PaymentMethod[] = [
   {
-    id: 'bank-transfer',
-    name: 'Bank Transfer',
-    nameAr: 'تحويل بنكي',
-    description: 'Pay via bank transfer',
-    descriptionAr: 'ادفع عبر التحويل البنكي',
+    id: 'bankek',
+    name: 'Bankek',
+    nameAr: 'بنكك',
+    description: 'Pay via Bank of Khartoum app',
+    descriptionAr: 'ادفع عبر تطبيق بنك الخرطوم',
     icon: BuildingLibraryIcon,
     color: 'primary',
     instructions: [
-      'Transfer the amount to our bank account',
-      'Include your order number in the transfer description',
-      'Send us the transfer receipt',
-      'We will confirm your payment within 24 hours'
+      'Open Bankek app on your phone',
+      'Login to your Bank of Khartoum account',
+      'Select "Send Money" or "Transfer"',
+      'Enter our account details and amount',
+      'Include your order number in the description',
+      'Confirm the transfer and keep the receipt'
     ],
     instructionsAr: [
-      'احول المبلغ إلى حسابنا البنكي',
-      'أضف رقم طلبك في وصف التحويل',
-      'أرسل لنا إيصال التحويل',
-      'سنؤكد دفعك خلال 24 ساعة'
+      'افتح تطبيق بنكك على هاتفك',
+      'سجل دخول إلى حساب بنك الخرطوم',
+      'اختر "إرسال أموال" أو "تحويل"',
+      'أدخل تفاصيل حسابنا والمبلغ',
+      'أضف رقم طلبك في الوصف',
+      'أكد التحويل واحتفظ بالإيصال'
     ]
   },
   {
-    id: 'cash',
-    name: 'Cash on Delivery',
-    nameAr: 'الدفع عند الاستلام',
-    description: 'Pay when you receive your order',
-    descriptionAr: 'ادفع عند استلام طلبك',
-    icon: BanknotesIcon,
-    color: 'success',
+    id: 'kashi',
+    name: 'Kashi',
+    nameAr: 'كاشي',
+    description: 'Pay via Omdurman National Bank app',
+    descriptionAr: 'ادفع عبر تطبيق البنك الوطني أم درمان',
+    icon: CreditCardIcon,
+    color: 'warning',
     instructions: [
-      'No upfront payment required',
-      'Pay the full amount when your order arrives',
-      'Available for orders within UAE',
-      'Additional delivery fee may apply'
+      'Open Kashi app on your phone',
+      'Login to your Omdurman National Bank account',
+      'Select "Payments" or "Transfer"',
+      'Enter our bank details and payment amount',
+      'Add your order number in the reference field',
+      'Complete the payment and save the confirmation'
     ],
     instructionsAr: [
-      'لا يلزم دفع مقدم',
-      'ادفع المبلغ الكامل عند وصول طلبك',
-      'متاح للطلبات داخل الإمارات',
-      'قد يتم تطبيق رسوم توصيل إضافية'
+      'افتح تطبيق كاشي على هاتفك',
+      'سجل دخول إلى حساب البنك الوطني أم درمان',
+      'اختر "المدفوعات" أو "تحويل"',
+      'أدخل تفاصيل البنك ومبلغ الدفع',
+      'أضف رقم طلبك في حقل المرجع',
+      'أكمل الدفع واحفظ التأكيد'
     ]
   },
   {
     id: 'fawry',
     name: 'Fawry',
     nameAr: 'فوري',
-    description: 'Pay via Fawry payment service',
-    descriptionAr: 'ادفع عبر خدمة فوري للدفع',
-    icon: CreditCardIcon,
-    color: 'warning',
+    description: 'Pay via Bank of Faisal app',
+    descriptionAr: 'ادفع عبر تطبيق بنك فيصل',
+    icon: BanknotesIcon,
+    color: 'success',
     instructions: [
-      'Visit any Fawry outlet',
-      'Provide your order number and phone number',
-      'Pay the amount shown',
-      'Keep the receipt for confirmation'
+      'Open Fawry app on your phone',
+      'Login to your Bank of Faisal account',
+      'Select "Pay Bills" or "Send Money"',
+      'Enter our account information and amount',
+      'Include your order number in the notes',
+      'Confirm payment and keep the receipt'
     ],
     instructionsAr: [
-      'اذهب إلى أي منفذ فوري',
-      'قدم رقم طلبك ورقم هاتفك',
-      'ادفع المبلغ المطلوب',
-      'احتفظ بالإيصال للتأكيد'
+      'افتح تطبيق فوري على هاتفك',
+      'سجل دخول إلى حساب بنك فيصل',
+      'اختر "دفع الفواتير" أو "إرسال أموال"',
+      'أدخل معلومات حسابنا والمبلغ',
+      'أضف رقم طلبك في الملاحظات',
+      'أكد الدفع واحتفظ بالإيصال'
     ]
   }
 ]
@@ -206,13 +218,7 @@ export default function PaymentPage() {
     router.push(`/quotation?${params.toString()}`)
   }
 
-  const getBankDetails = () => ({
-    bankName: 'Emirates NBD',
-    accountName: 'Spare Parts UAE LLC',
-    accountNumber: '1234567890',
-    iban: 'AE123456789012345678901',
-    swiftCode: 'EBILAEAD'
-  })
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -235,10 +241,10 @@ export default function PaymentPage() {
             
             <div className="text-right">
               <h1 className="text-3xl font-bold text-gray-900 mb-2 font-arabic">
-                إتمام الدفع
+                إتمام الدفع - السودان
               </h1>
               <p className="text-lg text-gray-600 font-arabic">
-                اختر طريقة الدفع المناسبة لك
+                اختر طريقة الدفع المناسبة لك عبر تطبيقات البنوك السودانية
               </p>
             </div>
           </div>
@@ -249,7 +255,7 @@ export default function PaymentPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6 font-arabic">
-                طرق الدفع المتاحة
+                طرق الدفع المتاحة في السودان
               </h2>
               
               <div className="space-y-4">
@@ -300,33 +306,38 @@ export default function PaymentPage() {
                 ))}
               </div>
 
-              {/* Bank Transfer Details */}
-              {selectedMethod === 'bank-transfer' && (
+              {/* Sudan Bank Details */}
+              {selectedMethod && (
                 <div className="mt-6 p-6 bg-primary-50 rounded-2xl border border-primary-200">
                   <h3 className="text-lg font-semibold text-primary-800 mb-4 font-arabic">
-                    تفاصيل الحساب البنكي
+                    تفاصيل الحساب البنكي في السودان
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-arabic">
                     <div>
                       <span className="text-primary-700">اسم البنك:</span>
-                      <span className="mr-2 font-semibold">{getBankDetails().bankName}</span>
+                      <span className="mr-2 font-semibold">بنك الخرطوم</span>
                     </div>
                     <div>
                       <span className="text-primary-700">اسم الحساب:</span>
-                      <span className="mr-2 font-semibold">{getBankDetails().accountName}</span>
+                      <span className="mr-2 font-semibold">شركة قطع الغيار السودان</span>
                     </div>
                     <div>
                       <span className="text-primary-700">رقم الحساب:</span>
-                      <span className="mr-2 font-semibold">{getBankDetails().accountNumber}</span>
+                      <span className="mr-2 font-semibold">1234567890</span>
                     </div>
                     <div>
                       <span className="text-primary-700">IBAN:</span>
-                      <span className="mr-2 font-semibold">{getBankDetails().iban}</span>
+                      <span className="mr-2 font-semibold">SD123456789012345678901</span>
                     </div>
                     <div>
                       <span className="text-primary-700">Swift Code:</span>
-                      <span className="mr-2 font-semibold">{getBankDetails().swiftCode}</span>
+                      <span className="mr-2 font-semibold">BKHKSDAD</span>
                     </div>
+                  </div>
+                  <div className="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                    <p className="text-sm text-yellow-800 font-arabic text-center">
+                      💡 استخدم تطبيق البنك المحدد لإتمام عملية الدفع بسهولة وأمان
+                    </p>
                   </div>
                 </div>
               )}
@@ -425,9 +436,9 @@ export default function PaymentPage() {
                 فريق الدعم متاح لمساعدتك
               </p>
               <div className="space-y-2 text-sm text-gray-600 font-arabic">
-                <p>📧 payments@spareparts.com</p>
-                <p>📱 +971 50 123 4567</p>
-                <p>💬 WhatsApp: +971 50 123 4567</p>
+                <p>📧 payments@spareparts.sd</p>
+                <p>📱 +249 91 123 4567</p>
+                <p>💬 WhatsApp: +249 91 123 4567</p>
               </div>
             </div>
           </div>

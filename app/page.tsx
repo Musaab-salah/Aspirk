@@ -8,6 +8,7 @@ import StepNavigation from '@/components/StepNavigation'
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [unifiedSearch, setUnifiedSearch] = useState('')
 
   // Define the workflow steps
   const steps = [
@@ -49,6 +50,36 @@ export default function HomePage() {
     e.preventDefault()
     // Handle search logic
     console.log('Searching for:', searchQuery)
+  }
+
+  const handleUnifiedSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!unifiedSearch.trim()) {
+      alert('يرجى إدخال نص للبحث')
+      return
+    }
+    
+    // Show loading state
+    const submitButton = e.currentTarget.querySelector('button[type="submit"]') as HTMLButtonElement
+    const originalText = submitButton.innerHTML
+    submitButton.innerHTML = '🔍 جاري البحث...'
+    submitButton.disabled = true
+    
+    // Navigate to spare parts page with search query
+    const searchParams = new URLSearchParams()
+    searchParams.append('search', unifiedSearch.trim())
+    
+    // You can also add car selection if available
+    // if (selectedCar) {
+    //   searchParams.append('brand', selectedCar.brand)
+    //   searchParams.append('model', selectedCar.model)
+    //   searchParams.append('year', selectedCar.year)
+    // }
+    
+    // Small delay to show loading state
+    setTimeout(() => {
+      window.location.href = `/spare-parts?${searchParams.toString()}`
+    }, 500)
   }
 
   const features = [
@@ -144,25 +175,7 @@ export default function HomePage() {
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-3xl mx-auto mb-16 animate-in fade-in duration-1000 animation-delay-500">
-              <form onSubmit={handleSearch} className="relative group">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="ابحث باسم القطعة أو رقم الشاسيه..."
-                    className="w-full px-8 py-6 text-lg lg:text-xl border-2 border-gray-300 rounded-2xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 font-arabic shadow-lg hover:shadow-xl transition-all duration-300 group-hover:shadow-2xl"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-primary-600 to-primary-700 text-white p-4 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-500/30"
-                  >
-                    <MagnifyingGlassIcon className="h-6 w-6" />
-                  </button>
-                </div>
-              </form>
-            </div>
+            
 
             {/* Quick Car Selector */}
             <div className="mb-16 animate-in fade-in duration-1000 animation-delay-700">
@@ -171,6 +184,71 @@ export default function HomePage() {
               </h2>
               <div className="max-w-6xl mx-auto">
                 <CarSelector />
+              </div>
+            </div>
+
+            {/* Unified Search Section */}
+            <div className="mb-16 animate-in fade-in duration-1000 animation-delay-800">
+              <h2 className="text-2xl lg:text-3xl font-semibold text-gray-800 mb-8 font-arabic">
+                بحث متقدم
+              </h2>
+              <div className="max-w-3xl mx-auto">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-white/20">
+                  <div className="text-center mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <span className="text-primary-600 font-bold text-3xl">🔍</span>
+                    </div>
+                    <h3 className="text-2xl font-semibold text-gray-900 font-arabic mb-2">
+                      بحث شامل
+                    </h3>
+                    <p className="text-gray-600 font-arabic">
+                      ابحث عن قطع الغيار باسمها أو برقم الشاسيه
+                    </p>
+                  </div>
+                  
+                  <form onSubmit={handleUnifiedSearch} className="space-y-6">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={unifiedSearch}
+                        onChange={(e) => setUnifiedSearch(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            handleUnifiedSearch(e as any)
+                          }
+                        }}
+                        placeholder="أدخل اسم القطعة أو رقم الشاسيه..."
+                        className="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-2xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 font-arabic text-center shadow-lg hover:shadow-xl transition-all duration-300"
+                      />
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                        <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-gradient-to-r from-primary-600 to-primary-700 text-white py-4 rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-300 font-arabic shadow-lg hover:shadow-xl transform hover:scale-105 text-lg"
+                      >
+                        🔍 بحث شامل
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setUnifiedSearch('')}
+                        className="px-6 py-4 border-2 border-gray-300 text-gray-600 rounded-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 font-arabic shadow-lg hover:shadow-xl"
+                      >
+                        مسح
+                      </button>
+                    </div>
+                    
+                    <div className="text-center">
+                      <p className="text-sm text-gray-500 font-arabic">
+                        💡 يمكنك البحث بـ: اسم القطعة • رقم الشاسيه • رقم المحرك • كود القطعة
+                      </p>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
 
