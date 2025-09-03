@@ -1,12 +1,49 @@
 'use client'
 
 import { useState } from 'react'
-import { MagnifyingGlassIcon, TruckIcon, ShieldCheckIcon, ClockIcon, StarIcon, ArrowRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, TruckIcon, ShieldCheckIcon, ClockIcon, StarIcon, ArrowRightIcon, CheckCircleIcon, HomeIcon, WrenchScrewdriverIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import CarSelector from '@/components/CarSelector'
+import StepNavigation from '@/components/StepNavigation'
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Define the workflow steps
+  const steps = [
+    {
+      id: 'home',
+      title: 'Home',
+      titleAr: 'الرئيسية',
+      icon: HomeIcon,
+      isCompleted: true,
+      isCurrent: true
+    },
+    {
+      id: 'select-car',
+      title: 'Select Car',
+      titleAr: 'اختيار السيارة',
+      icon: TruckIcon,
+      isCompleted: false,
+      isCurrent: false
+    },
+    {
+      id: 'spare-parts',
+      title: 'Spare Parts',
+      titleAr: 'قطع الغيار',
+      icon: WrenchScrewdriverIcon,
+      isCompleted: false,
+      isCurrent: false
+    },
+    {
+      id: 'confirm-order',
+      title: 'Confirm Order',
+      titleAr: 'تأكيد الطلب',
+      icon: ClipboardDocumentCheckIcon,
+      isCompleted: false,
+      isCurrent: false
+    }
+  ]
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,6 +111,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Step Navigation */}
+      <StepNavigation currentStep="home" steps={steps} />
+      
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background decoration */}
@@ -92,10 +132,10 @@ export default function HomePage() {
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 animate-in fade-in duration-1000">
               <span className="block font-arabic text-5xl md:text-7xl lg:text-8xl mb-4 text-gradient-primary">
-                اطلب قطع غيار سيارتك
+                سيجما بارت
               </span>
               <span className="block text-3xl md:text-5xl lg:text-6xl text-primary-600">
-                 من اي مكان  بكل سهولة
+                SigmaPart - قطع غيار السيارات
               </span>
             </h1>
             
@@ -129,7 +169,7 @@ export default function HomePage() {
               <h2 className="text-2xl lg:text-3xl font-semibold text-gray-800 mb-8 font-arabic">
                 اختر سيارتك بسرعة
               </h2>
-              <div className="max-w-4xl mx-auto">
+              <div className="max-w-6xl mx-auto">
                 <CarSelector />
               </div>
             </div>
@@ -244,7 +284,7 @@ export default function HomePage() {
               🚀 ابدأ الآن
             </span>
             <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6 font-arabic animate-in fade-in duration-1000">
-              ابدأ الآن واطلب قطع غيار سيارتك
+              ابدأ الآن مع سيجما بارت
             </h2>
             <p className="text-xl lg:text-2xl text-primary-100 mb-12 font-arabic max-w-3xl mx-auto leading-relaxed animate-in fade-in duration-1000 animation-delay-300">
               احصل على أفضل الأسعار والجودة المضمونة مع خدمة عملاء متميزة

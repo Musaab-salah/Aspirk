@@ -1,4 +1,4 @@
-# Spare Parts - نظام طلب قطع الغيار من الإمارات
+# SigmaPart - نظام طلب قطع الغيار من الإمارات
 
 A comprehensive spare parts ordering system for the UAE market, built with Next.js, TypeScript, and Tailwind CSS.
 
@@ -39,7 +39,7 @@ A comprehensive spare parts ordering system for the UAE market, built with Next.
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd spare-parts-uae
+   cd sigmapart-uae
    ```
 
 2. **Install dependencies**
@@ -70,7 +70,7 @@ A comprehensive spare parts ordering system for the UAE market, built with Next.
 ## 🏗️ Project Structure
 
 ```
-spare-parts-uae/
+sigmapart-uae/
 ├── app/                    # Next.js App Router
 │   ├── admin/             # Admin panel pages
 │   ├── globals.css        # Global styles
@@ -80,6 +80,7 @@ spare-parts-uae/
 │   ├── Header.tsx         # Main navigation
 │   ├── Footer.tsx         # Footer component
 │   ├── CarSelector.tsx    # Car selection component
+│   ├── StepNavigation.tsx # Step-by-step navigation
 │   └── SparePartCard.tsx  # Spare part display card
 ├── types/                 # TypeScript interfaces
 │   └── index.ts           # Main type definitions

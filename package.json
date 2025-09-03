@@ -1,7 +1,7 @@
 {
-  "name": "spare-parts-uae",
+  "name": "sigmapart-uae",
   "version": "1.0.0",
-  "description": "UAE Spare Parts Ordering System",
+  "description": "UAE SigmaPart Ordering System",
   "private": true,
   "scripts": {
     "dev": "next dev",

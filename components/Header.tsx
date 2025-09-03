@@ -12,11 +12,6 @@ export default function Header() {
 
   const navigation = [
     { name: 'الرئيسية', href: '/', icon: '🏠' },
-    { name: 'اختيار السيارة', href: '/car-selector', icon: '🚗' },
-    { name: 'قطع الغيار', href: '/spare-parts', icon: '🔧' },
-    { name: 'طلباتي', href: '/my-orders', icon: '📋' },
-    { name: 'طلب جديد', href: '/new-request', icon: '➕' },
-    { name: 'اتصل بنا', href: '/contact', icon: '📞' },
   ]
 
   // Handle scroll effect for sticky header
@@ -71,14 +66,14 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center group">
               <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 group-hover:rotate-3">
-                <span className="text-white font-bold text-xl lg:text-2xl">س</span>
+                <span className="text-white font-bold text-xl lg:text-2xl">Σ</span>
               </div>
               <div className="mr-3 lg:mr-4">
                 <h1 className="text-xl lg:text-2xl font-bold text-gray-900 font-arabic group-hover:text-primary-600 transition-colors duration-300">
-                  قطع الغيار
+                  سيجما بارت
                 </h1>
                 <p className="text-sm lg:text-base text-gray-500 font-arabic group-hover:text-primary-500 transition-colors duration-300">
-                  Spare Parts
+                  SigmaPart
                 </p>
               </div>
             </Link>

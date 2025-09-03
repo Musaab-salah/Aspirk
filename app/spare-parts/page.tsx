@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { MagnifyingGlassIcon, FunnelIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { MagnifyingGlassIcon, FunnelIcon, PhotoIcon, HomeIcon, TruckIcon, WrenchScrewdriverIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import SparePartCard from '@/components/SparePartCard'
+import StepNavigation from '@/components/StepNavigation'
+import Breadcrumb from '@/components/Breadcrumb'
 import { SparePart, SparePartCategory, COUNTRIES } from '@/types'
 
 // Mock data - in real app this would come from API
@@ -119,6 +121,7 @@ const mockSpareParts: SparePart[] = [
 
 export default function SparePartsPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
@@ -129,6 +132,42 @@ export default function SparePartsPage() {
   const brand = searchParams.get('brand')
   const model = searchParams.get('model')
   const year = searchParams.get('year')
+
+  // Define the workflow steps
+  const steps = [
+    {
+      id: 'home',
+      title: 'Home',
+      titleAr: 'الرئيسية',
+      icon: HomeIcon,
+      isCompleted: true,
+      isCurrent: false
+    },
+    {
+      id: 'select-car',
+      title: 'Select Car',
+      titleAr: 'اختيار السيارة',
+      icon: TruckIcon,
+      isCompleted: true,
+      isCurrent: false
+    },
+    {
+      id: 'spare-parts',
+      title: 'Spare Parts',
+      titleAr: 'قطع الغيار',
+      icon: WrenchScrewdriverIcon,
+      isCompleted: false,
+      isCurrent: true
+    },
+    {
+      id: 'confirm-order',
+      title: 'Confirm Order',
+      titleAr: 'تأكيد الطلب',
+      icon: ClipboardDocumentCheckIcon,
+      isCompleted: false,
+      isCurrent: false
+    }
+  ]
 
   // Filter spare parts based on criteria
   const filteredParts = mockSpareParts.filter(part => {
@@ -159,16 +198,27 @@ export default function SparePartsPage() {
       alert('يرجى اختيار قطع الغيار المطلوبة')
       return
     }
-    // Navigate to request summary page
+    // Navigate to order review page
     const partsParam = selectedParts.join(',')
-    window.location.href = `/request-summary?parts=${partsParam}&brand=${brand}&model=${model}&year=${year}`
+    router.push(`/order-review?parts=${partsParam}&brand=${brand}&model=${model}&year=${year}`)
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
+      {/* Step Navigation */}
+      <StepNavigation currentStep="spare-parts" steps={steps} />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { name: 'Select Car', nameAr: 'اختيار السيارة', href: '/' },
+            { name: 'Spare Parts', nameAr: 'قطع الغيار', isCurrent: true }
+          ]} 
+        />
+        
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-arabic">

@@ -23,10 +23,10 @@ const notoSansArabic = Noto_Sans_Arabic({
 })
 
 export const metadata: Metadata = {
-  title: 'Spare Parts - طلب قطع الغيار من الإمارات',
-  description: 'اطلب قطع غيار سيارتك  من اي مكان  بكل سهولة وأمان. خدمة موثوقة وسريعة لجميع أنواع السيارات.',
-  keywords: 'قطع غيار, سيارات, الإمارات, طلب قطع غيار, spare parts, UAE, car parts',
-  authors: [{ name: 'Spare Parts' }],
+  title: 'SigmaPart - طلب قطع الغيار من الإمارات',
+  description: 'اطلب قطع غيار سيارتك من اي مكان بكل سهولة وأمان. خدمة موثوقة وسريعة لجميع أنواع السيارات.',
+  keywords: 'قطع غيار, سيارات, الإمارات, طلب قطع غيار, SigmaPart, UAE, car parts',
+  authors: [{ name: 'SigmaPart' }],
 }
 
 export const viewport: Viewport = {

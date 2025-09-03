@@ -3,11 +3,6 @@ export default function Footer() {
 
   const quickLinks = [
     { name: 'الرئيسية', href: '/', icon: '🏠' },
-    { name: 'اختيار السيارة', href: '/car-selector', icon: '🚗' },
-    { name: 'قطع الغيار', href: '/spare-parts', icon: '🔧' },
-    { name: 'طلباتي', href: '/my-orders', icon: '📋' },
-    { name: 'طلب جديد', href: '/new-request', icon: '➕' },
-    { name: 'اتصل بنا', href: '/contact', icon: '📞' },
   ]
 
   const services = [
@@ -37,11 +32,11 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2 lg:col-span-2">
             <div className="flex items-center mb-6 group">
               <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 group-hover:rotate-3">
-                <span className="text-white font-bold text-2xl">س</span>
+                <span className="text-white font-bold text-2xl">Σ</span>
               </div>
               <div className="mr-4">
-                <h3 className="text-2xl font-bold font-arabic group-hover:text-primary-400 transition-colors duration-300">قطع الغيار</h3>
-                <p className="text-gray-400 font-arabic group-hover:text-primary-300 transition-colors duration-300">Spare Parts</p>
+                <h3 className="text-2xl font-bold font-arabic group-hover:text-primary-400 transition-colors duration-300">سيجما بارت</h3>
+                <p className="text-gray-400 font-arabic group-hover:text-primary-300 transition-colors duration-300">SigmaPart</p>
               </div>
             </div>
             <p className="text-gray-300 mb-6 font-arabic leading-relaxed text-lg">
@@ -175,7 +170,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="font-semibold text-white">البريد الإلكتروني</p>
-                  <p className="text-sm text-gray-400">info@spareparts-uae.ae</p>
+                  <p className="text-sm text-gray-400">info@sigmapart-uae.ae</p>
                 </div>
               </div>
               
@@ -199,7 +194,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-4 space-x-reverse mb-4 md:mb-0">
               <p className="text-gray-400 text-sm font-arabic">
-                © {currentYear} قطع الغيار الإمارات. جميع الحقوق محفوظة.
+                © {currentYear} سيجما بارت الإمارات. جميع الحقوق محفوظة.
               </p>
               <div className="flex items-center space-x-2 space-x-reverse">
                 <div className="w-2 h-2 bg-primary-600 rounded-full"></div>
