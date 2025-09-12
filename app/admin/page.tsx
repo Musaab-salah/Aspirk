@@ -612,7 +612,7 @@ export default function AdminDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in duration-1000">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 font-arabic mb-2 leading-relaxed">إجمالي الطلبات</p>
@@ -629,7 +629,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in duration-1000 animation-delay-200">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in animation-delay-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 font-arabic mb-2 leading-relaxed">طلبات بانتظار المراجعة</p>
@@ -646,7 +646,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in duration-1000 animation-delay-400">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in animation-delay-400">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 font-arabic mb-2 leading-relaxed">العملاء النشطين</p>
@@ -663,7 +663,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in duration-1000 animation-delay-600">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group animate-in fade-in animation-delay-600">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 font-arabic mb-2 leading-relaxed">الإيرادات الشهرية</p>
@@ -723,7 +723,7 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="space-y-4">
                 {filteredOrders.map((order, index) => (
-                  <div key={order.id} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all duration-300 hover:-translate-y-1 border border-gray-200 animate-in fade-in duration-1000" style={{ animationDelay: `${index * 100}ms` }}>
+                  <div key={order.id} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all duration-300 hover:-translate-y-1 border border-gray-200 animate-in fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 space-x-reverse">
                         <div className="p-2 bg-white rounded-lg shadow-sm">
@@ -821,7 +821,7 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-3">
                 {stats.topBrands.map((brand, index) => (
-                  <div key={brand.brand} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 animate-in fade-in duration-1000" style={{ animationDelay: `${(index + 1) * 200}ms` }}>
+                  <div key={brand.brand} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 animate-in fade-in" style={{ animationDelay: `${(index + 1) * 200}ms` }}>
                     <div className="flex items-center">
                       <span className="w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-xs font-bold ml-3 font-english">
                         {index + 1}
@@ -848,7 +848,7 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-3">
                 {stats.topCategories.map((category, index) => (
-                  <div key={category.category} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 animate-in fade-in duration-1000" style={{ animationDelay: `${(index + 1) * 200}ms` }}>
+                  <div key={category.category} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 animate-in fade-in" style={{ animationDelay: `${(index + 1) * 200}ms` }}>
                     <div className="flex items-center">
                       <span className="w-6 h-6 bg-success-600 text-white rounded-full flex items-center justify-center text-xs font-bold ml-3 font-english">
                         {index + 1}

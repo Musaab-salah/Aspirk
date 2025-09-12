@@ -45,9 +45,8 @@ describe('Shipping Validation', () => {
     })
 
     it('should return error for unsupported shipping method for country (air to land-only country)', () => {
-      // This test assumes we have a country that only supports land shipping
-      // For now, we'll test with a country that supports both
-      const result = validateShippingFields('land', 'US') // US only supports air
+      // Test with a country that only supports air shipping
+      const result = validateShippingFields('land', 'SO') // Somalia only supports air
       expect(result.isValid).toBe(false)
       expect(result.errors.destinationCountry).toBe('Shipping method "land" is not available for this country.')
     })
@@ -85,10 +84,10 @@ describe('Shipping Validation', () => {
     })
 
     it('should calculate correct air shipping cost for international destinations', () => {
-      const result = calculateShippingCost('air', 'US')
+      const result = calculateShippingCost('air', 'NG') // Nigeria
       expect(result.isAvailable).toBe(true)
-      expect(result.baseCost).toBe(200)
-      expect(result.estimatedDays).toBe(7)
+      expect(result.baseCost).toBe(150)
+      expect(result.estimatedDays).toBe(5)
       expect(result.currency).toBe('AED')
     })
   })

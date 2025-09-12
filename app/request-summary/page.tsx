@@ -6,6 +6,7 @@ import { CheckIcon, TruckIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ShippingForm from '@/components/ShippingForm'
+
 import { SparePart, validateShippingFields, calculateShippingCost, COUNTRIES, ExchangeRateConfig, calculateSDGPrice } from '@/types'
 
 // Mock data - in real app this would come from API

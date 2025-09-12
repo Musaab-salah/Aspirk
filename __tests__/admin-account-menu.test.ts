@@ -5,12 +5,11 @@ import AdminDashboard from '../app/admin/page'
 // Mock the AdminLogin component
 jest.mock('../components/AdminLogin', () => {
   return function MockAdminLogin({ onLogin, isLoading, error }: any) {
-    return (
-      <div data-testid="admin-login">
-        <button onClick={() => onLogin('admin', 'password')}>Login</button>
-        {isLoading && <span>Loading...</span>}
-        {error && <span>Error: {error}</span>}
-      </div>
+    const React = require('react')
+    return React.createElement('div', { 'data-testid': 'admin-login' },
+      React.createElement('button', { onClick: () => onLogin('admin', 'password') }, 'Login'),
+      isLoading && React.createElement('span', null, 'Loading...'),
+      error && React.createElement('span', null, `Error: ${error}`)
     )
   }
 })
@@ -41,7 +40,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should render the account menu button when authenticated', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     // Wait for authentication to complete
     await waitFor(() => {
@@ -54,7 +54,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should open account dropdown when clicked', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -76,7 +77,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should close account dropdown when clicking outside', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -104,7 +106,8 @@ describe('Admin Dashboard Account Menu', () => {
   it('should handle profile action when clicked', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -134,7 +137,8 @@ describe('Admin Dashboard Account Menu', () => {
   it('should handle settings action when clicked', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -158,7 +162,8 @@ describe('Admin Dashboard Account Menu', () => {
   it('should handle security action when clicked', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -182,7 +187,8 @@ describe('Admin Dashboard Account Menu', () => {
   it('should handle help action when clicked', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
     
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -204,7 +210,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should handle logout action when clicked', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -227,7 +234,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should display user information in dropdown header', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -243,7 +251,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should have proper ARIA attributes for accessibility', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()
@@ -263,7 +272,8 @@ describe('Admin Dashboard Account Menu', () => {
   })
 
   it('should close dropdown when escape key is pressed', async () => {
-    render(<AdminDashboard />)
+    const React = require('react')
+    render(React.createElement(AdminDashboard))
     
     await waitFor(() => {
       expect(screen.getByText('admin')).toBeInTheDocument()

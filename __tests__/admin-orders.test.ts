@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, jest } from '@jest/globals'
 
 // Mock fetch
-global.fetch = vi.fn()
+global.fetch = jest.fn()
 
 describe('Admin Orders Page', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    jest.clearAllMocks()
   })
 
   it('should filter orders by status', () => {
