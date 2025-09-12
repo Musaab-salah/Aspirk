@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { MagnifyingGlassIcon, FunnelIcon, PhotoIcon, HomeIcon, TruckIcon, WrenchScrewdriverIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, FunnelIcon, PhotoIcon, HomeIcon, TruckIcon, WrenchScrewdriverIcon, ClipboardDocumentCheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import SparePartCard from '@/components/SparePartCard'
 import StepNavigation from '@/components/StepNavigation'
 import Breadcrumb from '@/components/Breadcrumb'
-import { SparePart, SparePartCategory, COUNTRIES } from '@/types'
+import { SparePart, SparePartCategory, SparePartSelection, COUNTRIES, ExchangeRateConfig, calculateSDGPrice } from '@/types'
 
 // Mock data - in real app this would come from API
 const sparePartsCategories: SparePartCategory[] = [
@@ -20,114 +20,21 @@ const sparePartsCategories: SparePartCategory[] = [
   { id: '6', name: 'Interior', nameAr: 'التجهيزات الداخلية', icon: '💺' },
 ]
 
-const mockSpareParts: SparePart[] = [
-  {
-    id: '1',
-    name: 'Oil Filter',
-    nameAr: 'فلتر الزيت',
-    description: 'High quality oil filter for engine protection',
-    descriptionAr: 'فلتر زيت عالي الجودة لحماية المحرك',
-    image: '/images/air-filter.svg',
-    category: 'Engine Parts',
-    categoryAr: 'قطع المحرك',
-    compatibleCars: ['1', '2', '3'],
-    price: 45,
-    currency: 'AED',
-    isAvailable: true,
-    partNumber: 'OF-001',
-    countryOfOrigin: 'Germany',
-  },
-  {
-    id: '2',
-    name: 'Brake Pads',
-    nameAr: 'بطانات الفرامل',
-    description: 'Premium brake pads for optimal stopping power',
-    descriptionAr: 'بطانات فرامل مميزة لقوة توقف مثالية',
-    image: '/images/brake-pads.svg',
-    category: 'Brake System',
-    categoryAr: 'نظام الفرامل',
-    compatibleCars: ['1', '2', '3'],
-    price: 120,
-    currency: 'AED',
-    isAvailable: true,
-    partNumber: 'BP-002',
-    countryOfOrigin: 'Japan',
-  },
-  {
-    id: '3',
-    name: 'Air Filter',
-    nameAr: 'فلتر الهواء',
-    description: 'Air filter for clean engine air intake',
-    descriptionAr: 'فلتر هواء لمدخل هواء نظيف للمحرك',
-    image: '/images/air-filter.svg',
-    category: 'Engine Parts',
-    categoryAr: 'قطع المحرك',
-    compatibleCars: ['1', '2', '3'],
-    price: 35,
-    currency: 'AED',
-    isAvailable: true,
-    partNumber: 'AF-003',
-    countryOfOrigin: 'USA',
-  },
-  {
-    id: '4',
-    name: 'Shock Absorber',
-    nameAr: 'ممتص الصدمات',
-    description: 'Quality shock absorbers for smooth ride',
-    descriptionAr: 'ممتصات صدمات عالية الجودة لرحلة مريحة',
-    image: '/images/shock-absorber.svg',
-    category: 'Suspension',
-    categoryAr: 'نظام التعليق',
-    compatibleCars: ['1', '2', '3'],
-    price: 280,
-    currency: 'AED',
-    isAvailable: true,
-    partNumber: 'SA-004',
-    countryOfOrigin: 'Italy',
-  },
-  {
-    id: '5',
-    name: 'Battery',
-    nameAr: 'البطارية',
-    description: 'Long-lasting car battery',
-    descriptionAr: 'بطارية سيارة طويلة العمر',
-    image: '/images/battery.svg',
-    category: 'Electrical',
-    categoryAr: 'الأنظمة الكهربائية',
-    compatibleCars: ['1', '2', '3'],
-    price: 450,
-    currency: 'AED',
-    isAvailable: true,
-    partNumber: 'BAT-005',
-    countryOfOrigin: 'South Korea',
-  },
-  {
-    id: '6',
-    name: 'Headlight',
-    nameAr: 'المصباح الأمامي',
-    description: 'LED headlight for better visibility',
-    descriptionAr: 'مصباح أمامي LED لرؤية أفضل',
-    image: '/images/headlight.svg',
-    category: 'Electrical',
-    categoryAr: 'الأنظمة الكهربائية',
-    compatibleCars: ['1', '2', '3'],
-    price: 320,
-    currency: 'AED',
-    isAvailable: false,
-    partNumber: 'HL-006',
-    countryOfOrigin: 'China',
-  },
-]
+// Spare parts will be fetched from API
 
 export default function SparePartsPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [parts, setParts] = useState<SparePart[]>([])
   const [selectedCategory, setSelectedCategory] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [showAvailableOnly, setShowAvailableOnly] = useState(false)
-  const [selectedParts, setSelectedParts] = useState<string[]>([])
+  const [selectedParts, setSelectedParts] = useState<SparePartSelection[]>([])
   const [countryFilter, setCountryFilter] = useState('')
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRateConfig | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const brand = searchParams.get('brand')
   const model = searchParams.get('model')
@@ -140,6 +47,44 @@ export default function SparePartsPage() {
       setSearchQuery(searchParam)
     }
   }, [searchParam])
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchExchangeRate()
+    fetchSpareParts()
+  }, [])
+
+  const fetchExchangeRate = async () => {
+    try {
+      const response = await fetch('/api/admin/exchange-rate')
+      const data = await response.json()
+      if (data.success) {
+        setExchangeRate(data.data)
+      }
+    } catch (error) {
+      console.error('Error fetching exchange rate:', error)
+    }
+  }
+
+  const fetchSpareParts = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/admin/spare-parts')
+      const data = await response.json()
+      if (data.success) {
+        // Filter to only show available parts
+        const availableParts = data.data.filter((part: SparePart) => part.isAvailable)
+        setParts(availableParts)
+      } else {
+        setError(data.error || 'Failed to fetch spare parts')
+      }
+    } catch (error) {
+      console.error('Error fetching spare parts:', error)
+      setError('خطأ في الاتصال بالخادم')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Define the workflow steps
   const steps = [
@@ -178,7 +123,7 @@ export default function SparePartsPage() {
   ]
 
   // Filter spare parts based on criteria
-  const filteredParts = mockSpareParts.filter(part => {
+  const filteredParts = parts.filter(part => {
     const matchesCategory = !selectedCategory || part.category === selectedCategory
     const matchesSearch = !searchQuery || 
       part.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -186,30 +131,62 @@ export default function SparePartsPage() {
       part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       part.descriptionAr?.includes(searchQuery) ||
       part.partNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesPrice = (!priceRange.min || (part.price && part.price >= parseInt(priceRange.min))) &&
-                        (!priceRange.max || (part.price && part.price <= parseInt(priceRange.max)))
+    const matchesPrice = (!priceRange.min || (part.prices.commercial.aed && part.prices.commercial.aed >= parseInt(priceRange.min))) &&
+                        (!priceRange.max || (part.prices.commercial.aed && part.prices.commercial.aed <= parseInt(priceRange.max)))
     const matchesAvailability = !showAvailableOnly || part.isAvailable
     const matchesCountry = !countryFilter || part.countryOfOrigin === countryFilter
 
     return matchesCategory && matchesSearch && matchesPrice && matchesAvailability && matchesCountry
   })
 
-  const handlePartToggle = (partId: string) => {
+  const handlePartToggle = (part: SparePart) => {
+    setSelectedParts(prev => {
+      const existingIndex = prev.findIndex(p => p.partId === part.id)
+      if (existingIndex >= 0) {
+        // Remove if already selected
+        return prev.filter(p => p.partId !== part.id)
+      } else {
+        // Add with default values
+        return [...prev, {
+          partId: part.id,
+          quantity: 1,
+          type: 'commercial' as const,
+          part: part
+        }]
+      }
+    })
+  }
+
+  const handleQuantityChange = (partId: string, quantity: number) => {
     setSelectedParts(prev => 
-      prev.includes(partId) 
-        ? prev.filter(id => id !== partId)
-        : [...prev, partId]
+      prev.map(p => 
+        p.partId === partId 
+          ? { ...p, quantity: Math.max(1, quantity) }
+          : p
+      )
+    )
+  }
+
+  const handleTypeChange = (partId: string, type: 'original' | 'commercial') => {
+    setSelectedParts(prev => 
+      prev.map(p => 
+        p.partId === partId 
+          ? { ...p, type }
+          : p
+      )
     )
   }
 
   const handleRequestQuote = () => {
     if (selectedParts.length === 0) {
-      alert('يرجى اختيار قطع الغيار المطلوبة')
+      alert('يرجى اختيار قطع الغيار المطلوبة قبل المتابعة')
       return
     }
-    // Navigate to order review page
-    const partsParam = selectedParts.join(',')
-    router.push(`/order-review?parts=${partsParam}&brand=${brand}&model=${model}&year=${year}`)
+    // Navigate to order review page with enhanced data
+    const partsParam = selectedParts.map(p => p.partId).join(',')
+    const quantitiesParam = selectedParts.map(p => p.quantity).join(',')
+    const typesParam = selectedParts.map(p => p.type).join(',')
+    router.push(`/order-review?parts=${partsParam}&quantities=${quantitiesParam}&types=${typesParam}&brand=${brand}&model=${model}&year=${year}`)
   }
 
   return (
@@ -270,6 +247,7 @@ export default function SparePartsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="ابحث عن قطع الغيار..."
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
+                    suppressHydrationWarning
                   />
                   <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                   {searchQuery && (
@@ -334,6 +312,7 @@ export default function SparePartsPage() {
                     value={priceRange.min}
                     onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
+                    suppressHydrationWarning
                   />
                   <input
                     type="number"
@@ -341,6 +320,7 @@ export default function SparePartsPage() {
                     value={priceRange.max}
                     onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
@@ -353,6 +333,7 @@ export default function SparePartsPage() {
                     checked={showAvailableOnly}
                     onChange={(e) => setShowAvailableOnly(e.target.checked)}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    suppressHydrationWarning
                   />
                   <span className="mr-2 text-sm text-gray-700 font-arabic">
                     المتوفر فقط
@@ -406,16 +387,36 @@ export default function SparePartsPage() {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredParts.map(part => (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-arabic">جاري تحميل قطع الغيار...</p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <XMarkIcon className="h-5 w-5 text-red-600 ml-2" />
+                  <p className="text-red-800 font-arabic">{error}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredParts.map(part => (
                 <SparePartCard
                   key={part.id}
                   part={part}
-                  isSelected={selectedParts.includes(part.id)}
-                  onToggle={() => handlePartToggle(part.id)}
+                  isSelected={selectedParts.some(p => p.partId === part.id)}
+                  onToggle={() => handlePartToggle(part)}
+                  selectedPart={selectedParts.find(p => p.partId === part.id)}
+                  onQuantityChange={handleQuantityChange}
+                  onTypeChange={handleTypeChange}
+                  exchangeRate={exchangeRate?.aedToSdg}
                 />
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             {filteredParts.length === 0 && (
               <div className="text-center py-12">

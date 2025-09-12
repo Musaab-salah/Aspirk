@@ -7,7 +7,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import StepNavigation from '@/components/StepNavigation'
 import Breadcrumb from '@/components/Breadcrumb'
-import { SparePart } from '@/types'
+import { SparePart, SparePartSelection } from '@/types'
 
 // Mock data - in real app this would come from API
 const mockSpareParts: SparePart[] = [
@@ -21,8 +21,10 @@ const mockSpareParts: SparePart[] = [
     category: 'Engine Parts',
     categoryAr: 'قطع المحرك',
     compatibleCars: ['1', '2', '3'],
-    price: 45,
-    currency: 'AED',
+    prices: {
+      original: { aed: 65, sdg: 1950, usd: 18 },
+      commercial: { aed: 45, sdg: 1350, usd: 12 }
+    },
     isAvailable: true,
     partNumber: 'OF-001',
     countryOfOrigin: 'Germany',
@@ -37,8 +39,10 @@ const mockSpareParts: SparePart[] = [
     category: 'Brake System',
     categoryAr: 'نظام الفرامل',
     compatibleCars: ['1', '2', '3'],
-    price: 120,
-    currency: 'AED',
+    prices: {
+      original: { aed: 180, sdg: 5400, usd: 49 },
+      commercial: { aed: 120, sdg: 3600, usd: 33 }
+    },
     isAvailable: true,
     partNumber: 'BP-002',
     countryOfOrigin: 'Japan',
@@ -53,17 +57,74 @@ const mockSpareParts: SparePart[] = [
     category: 'Engine Parts',
     categoryAr: 'قطع المحرك',
     compatibleCars: ['1', '2', '3'],
-    price: 35,
-    currency: 'AED',
+    prices: {
+      original: { aed: 55, sdg: 1650, usd: 15 },
+      commercial: { aed: 35, sdg: 1050, usd: 10 }
+    },
     isAvailable: true,
     partNumber: 'AF-003',
     countryOfOrigin: 'USA',
+  },
+  {
+    id: '4',
+    name: 'Shock Absorber',
+    nameAr: 'ممتص الصدمات',
+    description: 'Quality shock absorbers for smooth ride',
+    descriptionAr: 'ممتصات صدمات عالية الجودة لرحلة مريحة',
+    image: '/images/shock-absorber.svg',
+    category: 'Suspension',
+    categoryAr: 'نظام التعليق',
+    compatibleCars: ['1', '2', '3'],
+    prices: {
+      original: { aed: 420, sdg: 12600, usd: 114 },
+      commercial: { aed: 280, sdg: 8400, usd: 76 }
+    },
+    isAvailable: true,
+    partNumber: 'SA-004',
+    countryOfOrigin: 'Italy',
+  },
+  {
+    id: '5',
+    name: 'Battery',
+    nameAr: 'البطارية',
+    description: 'Long-lasting car battery',
+    descriptionAr: 'بطارية سيارة طويلة العمر',
+    image: '/images/battery.svg',
+    category: 'Electrical',
+    categoryAr: 'الأنظمة الكهربائية',
+    compatibleCars: ['1', '2', '3'],
+    prices: {
+      original: { aed: 680, sdg: 20400, usd: 185 },
+      commercial: { aed: 450, sdg: 13500, usd: 123 }
+    },
+    isAvailable: true,
+    partNumber: 'BAT-005',
+    countryOfOrigin: 'South Korea',
+  },
+  {
+    id: '6',
+    name: 'Headlight',
+    nameAr: 'المصباح الأمامي',
+    description: 'LED headlight for better visibility',
+    descriptionAr: 'مصباح أمامي LED لرؤية أفضل',
+    image: '/images/headlight.svg',
+    category: 'Electrical',
+    categoryAr: 'الأنظمة الكهربائية',
+    compatibleCars: ['1', '2', '3'],
+    prices: {
+      original: { aed: 480, sdg: 14400, usd: 131 },
+      commercial: { aed: 320, sdg: 9600, usd: 87 }
+    },
+    isAvailable: false,
+    partNumber: 'HL-006',
+    countryOfOrigin: 'China',
   },
 ]
 
 interface OrderItem {
   part: SparePart
   quantity: number
+  type: 'original' | 'commercial'
   totalPrice: number
 }
 
@@ -77,6 +138,8 @@ export default function OrderReviewPage() {
   const model = searchParams.get('model')
   const year = searchParams.get('year')
   const partsParam = searchParams.get('parts')
+  const quantitiesParam = searchParams.get('quantities')
+  const typesParam = searchParams.get('types')
 
   // Progress steps
   const steps = [
@@ -117,13 +180,21 @@ export default function OrderReviewPage() {
   useEffect(() => {
     if (partsParam) {
       const partIds = partsParam.split(',')
-      const items: OrderItem[] = partIds.map(partId => {
+      const quantities = quantitiesParam ? quantitiesParam.split(',').map(Number) : partIds.map(() => 1)
+      const types = typesParam ? typesParam.split(',') as ('original' | 'commercial')[] : partIds.map(() => 'commercial' as const)
+      
+      const items: OrderItem[] = partIds.map((partId, index) => {
         const part = mockSpareParts.find(p => p.id === partId)
         if (part) {
+          const type = types[index] || 'commercial'
+          const quantity = quantities[index] || 1
+          const price = part.prices[type].aed
+          
           return {
             part,
-            quantity: 1,
-            totalPrice: part.price || 0
+            quantity,
+            type,
+            totalPrice: price * quantity
           }
         }
         return null
@@ -132,14 +203,22 @@ export default function OrderReviewPage() {
       setOrderItems(items)
     }
     setIsLoading(false)
-  }, [partsParam])
+  }, [partsParam, quantitiesParam, typesParam])
 
   const updateQuantity = (partId: string, newQuantity: number) => {
     if (newQuantity < 1) return
     
     setOrderItems(prev => prev.map(item => 
       item.part.id === partId 
-        ? { ...item, quantity: newQuantity, totalPrice: (item.part.price || 0) * newQuantity }
+        ? { ...item, quantity: newQuantity, totalPrice: item.part.prices[item.type].aed * newQuantity }
+        : item
+    ))
+  }
+
+  const updateType = (partId: string, newType: 'original' | 'commercial') => {
+    setOrderItems(prev => prev.map(item => 
+      item.part.id === partId 
+        ? { ...item, type: newType, totalPrice: item.part.prices[newType].aed * item.quantity }
         : item
     ))
   }
@@ -154,14 +233,15 @@ export default function OrderReviewPage() {
 
   const handleContinue = () => {
     if (orderItems.length === 0) {
-      alert('يرجى اختيار قطع الغيار المطلوبة')
+      alert('يرجى اختيار قطع الغيار المطلوبة قبل المتابعة')
       return
     }
     
     // Navigate to login page with order data
     const partsParam = orderItems.map(item => item.part.id).join(',')
     const quantitiesParam = orderItems.map(item => item.quantity).join(',')
-    router.push(`/login?parts=${partsParam}&quantities=${quantitiesParam}&brand=${brand}&model=${model}&year=${year}`)
+    const typesParam = orderItems.map(item => item.type).join(',')
+    router.push(`/login?parts=${partsParam}&quantities=${quantitiesParam}&types=${typesParam}&brand=${brand}&model=${model}&year=${year}`)
   }
 
   const handleBack = () => {
@@ -228,7 +308,15 @@ export default function OrderReviewPage() {
           
           {orderItems.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 font-arabic mb-4">لم يتم اختيار أي قطع غيار</p>
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <WrenchScrewdriverIcon className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2 font-arabic">
+                لا توجد قطع غيار مختارة
+              </h3>
+              <p className="text-gray-500 font-arabic mb-6">
+                يبدو أنك لم تختر أي قطع غيار بعد. يرجى العودة لصفحة قطع الغيار واختيار القطع المطلوبة.
+              </p>
               <button
                 onClick={handleBack}
                 className="btn-primary font-arabic"
@@ -244,8 +332,8 @@ export default function OrderReviewPage() {
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">القطعة</th>
-                      <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">الوصف</th>
-                      <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">السعر</th>
+                      <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">النوع</th>
+                      <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">الأسعار</th>
                       <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">الكمية</th>
                       <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">المجموع</th>
                       <th className="text-right py-4 px-4 font-semibold text-gray-900 font-arabic">الإجراءات</th>
@@ -268,14 +356,41 @@ export default function OrderReviewPage() {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <p className="text-sm text-gray-600 font-arabic max-w-xs">
-                            {item.part.descriptionAr}
-                          </p>
+                          <div className="flex space-x-2 space-x-reverse">
+                            <button
+                              onClick={() => updateType(item.part.id, 'original')}
+                              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                                item.type === 'original'
+                                  ? 'bg-primary-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              أصلي
+                            </button>
+                            <button
+                              onClick={() => updateType(item.part.id, 'commercial')}
+                              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                                item.type === 'commercial'
+                                  ? 'bg-primary-600 text-white'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              تجاري
+                            </button>
+                          </div>
                         </td>
                         <td className="py-4 px-4">
-                          <p className="font-semibold text-gray-900">
-                            {item.part.price} {item.part.currency}
-                          </p>
+                          <div className="space-y-1">
+                            <div className="text-sm font-semibold text-primary-600">
+                              {item.part.prices[item.type].aed} AED
+                            </div>
+                            <div className="text-xs text-success-600">
+                              {item.part.prices[item.type].sdg} SDG
+                            </div>
+                            <div className="text-xs text-warning-600">
+                              ${item.part.prices[item.type].usd} USD
+                            </div>
+                          </div>
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex items-center space-x-2 space-x-reverse">
@@ -295,9 +410,17 @@ export default function OrderReviewPage() {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <p className="font-semibold text-primary-600">
-                            {item.totalPrice} {item.part.currency}
-                          </p>
+                          <div className="space-y-1">
+                            <div className="text-sm font-semibold text-primary-600">
+                              {item.totalPrice} AED
+                            </div>
+                            <div className="text-xs text-success-600">
+                              {item.part.prices[item.type].sdg * item.quantity} SDG
+                            </div>
+                            <div className="text-xs text-warning-600">
+                              ${item.part.prices[item.type].usd * item.quantity} USD
+                            </div>
+                          </div>
                         </td>
                         <td className="py-4 px-4">
                           <button
@@ -315,11 +438,21 @@ export default function OrderReviewPage() {
 
               {/* Order Total */}
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-semibold text-gray-900 font-arabic">المجموع الكلي:</span>
-                  <span className="text-2xl font-bold text-primary-600">
-                    {getTotalPrice()} AED
-                  </span>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-semibold text-gray-900 font-arabic">المجموع الكلي:</span>
+                    <div className="text-right space-y-1">
+                      <div className="text-2xl font-bold text-primary-600">
+                        {getTotalPrice()} AED
+                      </div>
+                      <div className="text-lg font-semibold text-success-600">
+                        {orderItems.reduce((total, item) => total + (item.part.prices[item.type].sdg * item.quantity), 0)} SDG
+                      </div>
+                      <div className="text-lg font-semibold text-warning-600">
+                        ${orderItems.reduce((total, item) => total + (item.part.prices[item.type].usd * item.quantity), 0)} USD
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </>

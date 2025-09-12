@@ -25,7 +25,7 @@ import {
   QuestionMarkCircleIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/outline'
-import { DashboardStats, Order, COUNTRIES } from '@/types'
+import { DashboardStats, Order, COUNTRIES, ExchangeRateConfig, validateExchangeRate } from '@/types'
 import AdminLogin from '@/components/AdminLogin'
 
 // Mock data - in real app this would come from API
@@ -159,6 +159,11 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRateConfig | null>(null)
+  const [showExchangeRateModal, setShowExchangeRateModal] = useState(false)
+  const [newExchangeRate, setNewExchangeRate] = useState('')
+  const [exchangeRateError, setExchangeRateError] = useState('')
+  const [isUpdatingExchangeRate, setIsUpdatingExchangeRate] = useState(false)
 
   // Check if user is already authenticated on component mount
   useEffect(() => {
@@ -169,6 +174,67 @@ export default function AdminDashboard() {
       setAdminUsername(savedUsername)
     }
   }, [])
+
+  // Fetch exchange rate when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchExchangeRate()
+    }
+  }, [isAuthenticated])
+
+  const fetchExchangeRate = async () => {
+    try {
+      const response = await fetch('/api/admin/exchange-rate')
+      const data = await response.json()
+      if (data.success) {
+        setExchangeRate(data.data)
+        setNewExchangeRate(data.data.aedToSdg.toString())
+      }
+    } catch (error) {
+      console.error('Error fetching exchange rate:', error)
+    }
+  }
+
+  const handleUpdateExchangeRate = async () => {
+    const rate = parseFloat(newExchangeRate)
+    const validation = validateExchangeRate(rate)
+    
+    if (!validation.isValid) {
+      setExchangeRateError(validation.error || 'Invalid exchange rate')
+      return
+    }
+
+    setIsUpdatingExchangeRate(true)
+    setExchangeRateError('')
+
+    try {
+      const response = await fetch('/api/admin/exchange-rate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          aedToSdg: rate,
+          updatedBy: adminUsername
+        }),
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setExchangeRate(data.data)
+        setShowExchangeRateModal(false)
+        // Refresh the page to update all prices
+        window.location.reload()
+      } else {
+        setExchangeRateError(data.error || 'Failed to update exchange rate')
+      }
+    } catch (error) {
+      console.error('Error updating exchange rate:', error)
+      setExchangeRateError('خطأ في الاتصال بالخادم')
+    } finally {
+      setIsUpdatingExchangeRate(false)
+    }
+  }
 
   // Close account menu when clicking outside
   useEffect(() => {
@@ -492,6 +558,57 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Exchange Rate Management */}
+        {exchangeRate && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-in fade-in duration-1000 animation-delay-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <div className="w-2 h-8 bg-primary-600 rounded-full"></div>
+                <h2 className="text-xl font-semibold text-gray-900 font-arabic tracking-wide">
+                  إدارة سعر الصرف
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowExchangeRateModal(true)}
+                className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-arabic text-sm"
+              >
+                تحديث سعر الصرف
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded-xl p-4">
+                <div className="text-sm text-gray-600 font-arabic mb-1">سعر الصرف الحالي</div>
+                <div className="text-2xl font-bold text-primary-600 font-english">
+                  1 AED = {exchangeRate.aedToSdg} SDG
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <div className="text-sm text-gray-600 font-arabic mb-1">آخر تحديث</div>
+                <div className="text-lg font-semibold text-gray-900 font-arabic">
+                  {new Date(exchangeRate.lastUpdated).toLocaleDateString('ar-SA')}
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <div className="text-sm text-gray-600 font-arabic mb-1">تم التحديث بواسطة</div>
+                <div className="text-lg font-semibold text-gray-900 font-arabic">
+                  {exchangeRate.updatedBy}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <div className="flex items-start space-x-2 space-x-reverse">
+                <div className="text-blue-600 text-lg">ℹ️</div>
+                <div className="text-sm text-blue-800 font-arabic">
+                  <strong>ملاحظة:</strong> الأسعار المعروضة للمستخدمين تكون بالجنيه السوداني (SDG) فقط، 
+                  بناءً على سعر الصرف الحالي. عند تحديث سعر الصرف، ستتحديث جميع الأسعار المعروضة تلقائياً.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -817,6 +934,75 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Exchange Rate Update Modal */}
+      {showExchangeRateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 font-arabic">
+                تحديث سعر الصرف
+              </h2>
+            </div>
+            <div className="px-6 py-4">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">
+                  سعر الصرف الجديد (1 AED = X SDG)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max="1000"
+                  value={newExchangeRate}
+                  onChange={(e) => {
+                    setNewExchangeRate(e.target.value)
+                    setExchangeRateError('')
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic text-lg"
+                  placeholder="أدخل سعر الصرف"
+                />
+                {exchangeRateError && (
+                  <p className="text-red-600 text-sm mt-2 font-arabic">{exchangeRateError}</p>
+                )}
+              </div>
+              
+              <div className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="flex items-start space-x-2 space-x-reverse">
+                  <div className="text-yellow-600 text-lg">⚠️</div>
+                  <div className="text-sm text-yellow-800 font-arabic">
+                    <strong>تحذير:</strong> تحديث سعر الصرف سيؤثر على جميع الأسعار المعروضة للمستخدمين. 
+                    تأكد من صحة القيمة قبل الحفظ.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 space-x-reverse">
+              <button
+                onClick={() => {
+                  setShowExchangeRateModal(false)
+                  setExchangeRateError('')
+                  setNewExchangeRate(exchangeRate?.aedToSdg.toString() || '')
+                }}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-arabic"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleUpdateExchangeRate}
+                disabled={isUpdatingExchangeRate}
+                className={`px-4 py-2 rounded-lg font-arabic transition-colors ${
+                  isUpdatingExchangeRate
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-primary-600 text-white hover:bg-primary-700'
+                }`}
+              >
+                {isUpdatingExchangeRate ? 'جاري التحديث...' : 'تحديث سعر الصرف'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

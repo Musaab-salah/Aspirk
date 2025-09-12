@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Bars3Icon, XMarkIcon, UserIcon, ShoppingCartIcon, ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
+// Suppress hydration warnings for browser extension attributes
+const suppressHydrationWarning = true
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
@@ -106,17 +109,22 @@ export default function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="البحث..."
                 className="w-64 px-4 py-2 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md font-arabic text-sm"
+                suppressHydrationWarning={suppressHydrationWarning}
               />
               <button
                 type="submit"
                 className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary-600 transition-colors duration-200"
+                suppressHydrationWarning
               >
                 <MagnifyingGlassIcon className="h-5 w-5" />
               </button>
             </form>
 
             {/* Language Switcher */}
-            <button className="text-gray-700 hover:text-primary-600 font-medium font-arabic transition-all duration-300 hover:scale-105 px-3 py-2 rounded-lg hover:bg-primary-50">
+            <button 
+              className="text-gray-700 hover:text-primary-600 font-medium font-arabic transition-all duration-300 hover:scale-105 px-3 py-2 rounded-lg hover:bg-primary-50"
+              suppressHydrationWarning
+            >
               English
             </button>
 
@@ -133,6 +141,7 @@ export default function Header() {
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="flex items-center space-x-2 space-x-reverse text-gray-700 hover:text-primary-600 transition-all duration-300 hover:scale-105 group"
+                suppressHydrationWarning
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-primary-100 group-hover:to-primary-200 transition-all duration-300 shadow-sm group-hover:shadow-md">
                   <UserIcon className="h-5 w-5" />
@@ -179,6 +188,7 @@ export default function Header() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-primary-600 transition-all duration-300 p-2 rounded-xl hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              suppressHydrationWarning
             >
               {isMenuOpen ? (
                 <XMarkIcon className="h-6 w-6" />
@@ -202,10 +212,12 @@ export default function Header() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="البحث في الموقع..."
                     className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 shadow-sm font-arabic"
+                    suppressHydrationWarning={suppressHydrationWarning}
                   />
                   <button
                     type="submit"
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary-600 transition-colors duration-200"
+                    suppressHydrationWarning
                   >
                     <MagnifyingGlassIcon className="h-5 w-5" />
                   </button>
@@ -256,7 +268,10 @@ export default function Header() {
 
               {/* Mobile Language Switcher */}
               <div className="border-t border-gray-200 pt-4 mt-4">
-                <button className="w-full px-4 py-4 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl font-arabic transition-all duration-300 flex items-center justify-center space-x-2 space-x-reverse">
+                <button 
+                  className="w-full px-4 py-4 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl font-arabic transition-all duration-300 flex items-center justify-center space-x-2 space-x-reverse"
+                  suppressHydrationWarning
+                >
                   <span>🌐</span>
                   <span>English</span>
                 </button>

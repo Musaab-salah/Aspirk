@@ -3,6 +3,17 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'res.cloudinary.com'],
   },
+  // Custom webpack configuration to handle hydration warnings
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Suppress hydration warnings in development
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      }
+    }
+    return config
+  },
 }
 
 module.exports = nextConfig

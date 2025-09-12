@@ -1,17 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckIcon, PhotoIcon, TagIcon } from '@heroicons/react/24/outline'
-import { SparePart } from '@/types'
+import { CheckIcon, PhotoIcon, TagIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline'
+import { SparePart, SparePartSelection, calculateSDGPrice } from '@/types'
 
 interface SparePartCardProps {
   part: SparePart
   isSelected: boolean
   onToggle: () => void
+  selectedPart?: SparePartSelection
+  onQuantityChange?: (partId: string, quantity: number) => void
+  onTypeChange?: (partId: string, type: 'original' | 'commercial') => void
+  exchangeRate?: number // AED to SDG exchange rate
 }
 
-export default function SparePartCard({ part, isSelected, onToggle }: SparePartCardProps) {
+export default function SparePartCard({ 
+  part, 
+  isSelected, 
+  onToggle, 
+  selectedPart, 
+  onQuantityChange, 
+  onTypeChange,
+  exchangeRate = 30 // Default exchange rate if not provided
+}: SparePartCardProps) {
   const [imageError, setImageError] = useState(false)
+  
+  const currentType = selectedPart?.type || 'commercial'
+  const currentQuantity = selectedPart?.quantity || 1
+  const currentPrices = part.prices[currentType]
 
   return (
     <div className={`bg-white rounded-lg shadow-md border-2 transition-all duration-200 hover:shadow-lg ${
@@ -89,34 +105,99 @@ export default function SparePartCard({ part, isSelected, onToggle }: SparePartC
           </p>
         )}
 
-        {/* Price */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-lg font-bold text-primary-600">
-              {part.price} {part.currency}
-            </span>
-            {part.price && (
-              <span className="text-sm text-gray-500 font-arabic mr-2">
-                (سعر تقريبي)
-              </span>
-            )}
+        {/* SDG Pricing Only */}
+        <div className="mb-3">
+          <div className="text-sm font-medium text-gray-700 mb-2 font-arabic">
+            السعر ({currentType === 'original' ? 'أصلي' : 'تجاري'}):
+          </div>
+          <div className="bg-success-50 p-3 rounded-lg text-center border border-success-200">
+            <div className="text-2xl font-bold text-success-700 font-english">
+              {calculateSDGPrice(currentPrices.aed, exchangeRate)} SDG
+            </div>
+            <div className="text-xs text-success-600 font-arabic mt-1">
+              جنيه سوداني
+            </div>
           </div>
         </div>
 
-        {/* Action Button */}
-        <button
-          onClick={onToggle}
-          disabled={!part.isAvailable}
-          className={`w-full py-2 px-4 rounded-lg font-medium transition-colors font-arabic ${
-            isSelected
-              ? 'bg-primary-600 text-white hover:bg-primary-700'
-              : part.isAvailable
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        {/* Selection Controls */}
+        {isSelected ? (
+          <div className="space-y-3">
+            {/* Type Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">
+                نوع القطعة:
+              </label>
+              <div className="flex space-x-2 space-x-reverse">
+                <button
+                  onClick={() => onTypeChange?.(part.id, 'original')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    currentType === 'original'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  أصلي
+                </button>
+                <button
+                  onClick={() => onTypeChange?.(part.id, 'commercial')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    currentType === 'commercial'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  تجاري
+                </button>
+              </div>
+            </div>
+
+            {/* Quantity Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">
+                الكمية:
+              </label>
+              <div className="flex items-center justify-center space-x-3 space-x-reverse">
+                <button
+                  onClick={() => onQuantityChange?.(part.id, currentQuantity - 1)}
+                  disabled={currentQuantity <= 1}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <MinusIcon className="h-4 w-4" />
+                </button>
+                <span className="text-lg font-bold text-gray-900 min-w-[2rem] text-center">
+                  {currentQuantity}
+                </span>
+                <button
+                  onClick={() => onQuantityChange?.(part.id, currentQuantity + 1)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Remove Button */}
+            <button
+              onClick={onToggle}
+              className="w-full py-2 px-4 rounded-lg font-medium transition-colors font-arabic bg-danger-100 text-danger-700 hover:bg-danger-200"
+            >
+              إلغاء الاختيار
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onToggle}
+            disabled={!part.isAvailable}
+            className={`w-full py-2 px-4 rounded-lg font-medium transition-colors font-arabic ${
+              part.isAvailable
+                ? 'bg-primary-600 text-white hover:bg-primary-700'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          {isSelected ? 'إلغاء الاختيار' : part.isAvailable ? 'اختيار القطعة' : 'غير متوفر'}
-        </button>
+            }`}
+          >
+            {part.isAvailable ? 'اختيار القطعة' : 'غير متوفر'}
+          </button>
+        )}
       </div>
     </div>
   )

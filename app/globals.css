@@ -2,12 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enhanced Font Imports with Better Arabic Support */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+/* Font loading is handled by Next.js next/font/google in layout.tsx */
+/* This provides better performance and automatic fallbacks */
 
-/* Font loading optimization */
+/* Font loading optimization with robust fallbacks */
 @font-face {
   font-family: 'Inter';
   font-style: normal;
@@ -127,6 +125,15 @@ body {
 .bg-warning-700 { background-color: #b45309; }
 .bg-warning-800 { background-color: #92400e; }
 
+.bg-danger-50 { background-color: #fef2f2; }
+.bg-danger-100 { background-color: #fee2e2; }
+.bg-danger-200 { background-color: #fecaca; }
+.bg-danger-300 { background-color: #fca5a5; }
+.bg-danger-500 { background-color: #ef4444; }
+.bg-danger-600 { background-color: #dc2626; }
+.bg-danger-700 { background-color: #b91c1c; }
+.bg-danger-800 { background-color: #991b1b; }
+
 .text-primary-50 { color: #eff6ff; }
 .text-primary-100 { color: #dbeafe; }
 .text-primary-200 { color: #bfdbfe; }
@@ -154,6 +161,15 @@ body {
 .text-warning-700 { color: #b45309; }
 .text-warning-800 { color: #92400e; }
 
+.text-danger-50 { color: #fef2f2; }
+.text-danger-100 { color: #fee2e2; }
+.text-danger-200 { color: #fecaca; }
+.text-danger-300 { color: #fca5a5; }
+.text-danger-500 { color: #ef4444; }
+.text-danger-600 { color: #dc2626; }
+.text-danger-700 { color: #b91c1c; }
+.text-danger-800 { color: #991b1b; }
+
 .border-primary-50 { border-color: #eff6ff; }
 .border-primary-100 { border-color: #dbeafe; }
 .border-primary-200 { border-color: #bfdbfe; }
@@ -179,6 +195,15 @@ body {
 .border-warning-600 { border-color: #d97706; }
 .border-warning-700 { border-color: #b45309; }
 .border-warning-800 { border-color: #92400e; }
+
+.border-danger-50 { border-color: #fef2f2; }
+.border-danger-100 { border-color: #fee2e2; }
+.border-danger-200 { border-color: #fecaca; }
+.border-danger-300 { border-color: #fca5a5; }
+.border-danger-500 { border-color: #ef4444; }
+.border-danger-600 { border-color: #dc2626; }
+.border-danger-700 { border-color: #b91c1c; }
+.border-danger-800 { border-color: #991b1b; }
 
 /* Typographic Hierarchy */
 .heading-1 {
@@ -767,6 +792,26 @@ html {
   .hover-lift, .hover-scale {
     @apply transform-none;
   }
+}
+
+/* Robust font fallback definitions */
+:root {
+  --font-inter: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+  --font-noto-sans-arabic: 'Noto Sans Arabic', 'IBM Plex Sans Arabic', 'Arial', 'Segoe UI', sans-serif;
+  --font-ibm-plex-arabic: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Arial', 'Segoe UI', sans-serif;
+}
+
+/* Font utility classes with fallbacks */
+.font-english {
+  font-family: var(--font-inter);
+}
+
+.font-arabic {
+  font-family: var(--font-noto-sans-arabic);
+}
+
+.font-arabic-plex {
+  font-family: var(--font-ibm-plex-arabic);
 }
 
 /* Dark mode support */

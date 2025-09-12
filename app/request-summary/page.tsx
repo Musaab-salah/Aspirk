@@ -6,7 +6,7 @@ import { CheckIcon, TruckIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ShippingForm from '@/components/ShippingForm'
-import { SparePart, validateShippingFields, calculateShippingCost, COUNTRIES } from '@/types'
+import { SparePart, validateShippingFields, calculateShippingCost, COUNTRIES, ExchangeRateConfig, calculateSDGPrice } from '@/types'
 
 // Mock data - in real app this would come from API
 const mockSpareParts: SparePart[] = [
@@ -20,8 +20,10 @@ const mockSpareParts: SparePart[] = [
     category: 'Engine Parts',
     categoryAr: 'قطع المحرك',
     compatibleCars: ['1', '2', '3'],
-    price: 45,
-    currency: 'AED',
+    prices: {
+      original: { aed: 65, sdg: 1950, usd: 18 },
+      commercial: { aed: 45, sdg: 1350, usd: 12 }
+    },
     isAvailable: true,
     partNumber: 'OF-001',
     countryOfOrigin: 'Germany',
@@ -36,8 +38,10 @@ const mockSpareParts: SparePart[] = [
     category: 'Brake System',
     categoryAr: 'نظام الفرامل',
     compatibleCars: ['1', '2', '3'],
-    price: 120,
-    currency: 'AED',
+    prices: {
+      original: { aed: 180, sdg: 5400, usd: 49 },
+      commercial: { aed: 120, sdg: 3600, usd: 33 }
+    },
     isAvailable: true,
     partNumber: 'BP-002',
     countryOfOrigin: 'Japan',
@@ -52,11 +56,67 @@ const mockSpareParts: SparePart[] = [
     category: 'Engine Parts',
     categoryAr: 'قطع المحرك',
     compatibleCars: ['1', '2', '3'],
-    price: 35,
-    currency: 'AED',
+    prices: {
+      original: { aed: 55, sdg: 1650, usd: 15 },
+      commercial: { aed: 35, sdg: 1050, usd: 10 }
+    },
     isAvailable: true,
     partNumber: 'AF-003',
     countryOfOrigin: 'USA',
+  },
+  {
+    id: '4',
+    name: 'Shock Absorber',
+    nameAr: 'ممتص الصدمات',
+    description: 'Quality shock absorbers for smooth ride',
+    descriptionAr: 'ممتصات صدمات عالية الجودة لرحلة مريحة',
+    image: '/images/shock-absorber.svg',
+    category: 'Suspension',
+    categoryAr: 'نظام التعليق',
+    compatibleCars: ['1', '2', '3'],
+    prices: {
+      original: { aed: 420, sdg: 12600, usd: 114 },
+      commercial: { aed: 280, sdg: 8400, usd: 76 }
+    },
+    isAvailable: true,
+    partNumber: 'SA-004',
+    countryOfOrigin: 'Italy',
+  },
+  {
+    id: '5',
+    name: 'Battery',
+    nameAr: 'البطارية',
+    description: 'Long-lasting car battery',
+    descriptionAr: 'بطارية سيارة طويلة العمر',
+    image: '/images/battery.svg',
+    category: 'Electrical',
+    categoryAr: 'الأنظمة الكهربائية',
+    compatibleCars: ['1', '2', '3'],
+    prices: {
+      original: { aed: 680, sdg: 20400, usd: 185 },
+      commercial: { aed: 450, sdg: 13500, usd: 123 }
+    },
+    isAvailable: true,
+    partNumber: 'BAT-005',
+    countryOfOrigin: 'South Korea',
+  },
+  {
+    id: '6',
+    name: 'Headlight',
+    nameAr: 'المصباح الأمامي',
+    description: 'LED headlight for better visibility',
+    descriptionAr: 'مصباح أمامي LED لرؤية أفضل',
+    image: '/images/headlight.svg',
+    category: 'Electrical',
+    categoryAr: 'الأنظمة الكهربائية',
+    compatibleCars: ['1', '2', '3'],
+    prices: {
+      original: { aed: 480, sdg: 14400, usd: 131 },
+      commercial: { aed: 320, sdg: 9600, usd: 87 }
+    },
+    isAvailable: false,
+    partNumber: 'HL-006',
+    countryOfOrigin: 'China',
   },
 ]
 
@@ -76,6 +136,8 @@ export default function RequestSummaryPage() {
   const [validation, setValidation] = useState({ isValid: true, errors: {} })
   const [showValidation, setShowValidation] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRateConfig | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const partsParam = searchParams.get('parts')
   const brand = searchParams.get('brand')
@@ -85,12 +147,44 @@ export default function RequestSummaryPage() {
   useEffect(() => {
     if (partsParam) {
       const partIds = partsParam.split(',')
-      const parts = mockSpareParts.filter(part => partIds.includes(part.id))
-      setSelectedParts(parts)
+      fetchSpareParts(partIds)
     }
   }, [partsParam])
 
-  const totalEstimatedPrice = selectedParts.reduce((sum, part) => sum + (part.price || 0), 0)
+  const fetchSpareParts = async (partIds: string[]) => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/admin/spare-parts')
+      const data = await response.json()
+      if (data.success) {
+        const parts = data.data.filter((part: SparePart) => partIds.includes(part.id))
+        setSelectedParts(parts)
+      }
+    } catch (error) {
+      console.error('Error fetching spare parts:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Fetch exchange rate on component mount
+  useEffect(() => {
+    fetchExchangeRate()
+  }, [])
+
+  const fetchExchangeRate = async () => {
+    try {
+      const response = await fetch('/api/admin/exchange-rate')
+      const data = await response.json()
+      if (data.success) {
+        setExchangeRate(data.data)
+      }
+    } catch (error) {
+      console.error('Error fetching exchange rate:', error)
+    }
+  }
+
+  const totalEstimatedPrice = selectedParts.reduce((sum, part) => sum + (part.prices.commercial.aed || 0), 0)
 
   const handleInputChange = (field: string, value: string) => {
     setCustomerInfo(prev => ({ ...prev, [field]: value }))
@@ -195,7 +289,10 @@ export default function RequestSummaryPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-primary-600">
-                      {part.price} {part.currency}
+                      {exchangeRate ? 
+                        `${calculateSDGPrice(part.prices.commercial.aed, exchangeRate.aedToSdg)} SDG` : 
+                        `${part.prices.commercial.aed} AED`
+                      }
                     </p>
                     <p className="text-xs text-gray-500 font-arabic">(سعر تقريبي)</p>
                   </div>
@@ -208,12 +305,20 @@ export default function RequestSummaryPage() {
                     إجمالي السعر التقريبي:
                   </span>
                   <span className="text-xl font-bold text-primary-600">
-                    {totalEstimatedPrice} AED
+                    {exchangeRate ? 
+                      `${calculateSDGPrice(totalEstimatedPrice, exchangeRate.aedToSdg)} SDG` : 
+                      `${totalEstimatedPrice} AED`
+                    }
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1 font-arabic">
                   * السعر النهائي سيتم تأكيده من قبل فريقنا
                 </p>
+                {exchangeRate && (
+                  <p className="text-xs text-blue-600 mt-2 font-arabic">
+                    💡 جميع الأسعار معروضة بالجنيه السوداني (SDG) بناءً على سعر الصرف الحالي
+                  </p>
+                )}
               </div>
 
               {/* Shipping Information Summary */}

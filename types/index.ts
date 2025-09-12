@@ -42,12 +42,59 @@ export interface SparePart {
   category: string;
   categoryAr: string;
   compatibleCars: string[]; // Car IDs
-  price?: number;
-  currency: 'AED' | 'USD';
+  prices: {
+    original: {
+      aed: number;
+      sdg: number;
+      usd: number;
+    };
+    commercial: {
+      aed: number;
+      sdg: number;
+      usd: number;
+    };
+  };
   isAvailable: boolean;
   supplierId?: string;
   partNumber: string;
   countryOfOrigin: string;
+}
+
+// Exchange rate configuration
+export interface ExchangeRateConfig {
+  id: string;
+  aedToSdg: number; // 1 AED = X SDG
+  lastUpdated: Date;
+  updatedBy: string;
+}
+
+// System configuration
+export interface SystemConfig {
+  exchangeRate: ExchangeRateConfig;
+  displayCurrency: 'SDG'; // Only SDG for users
+  adminCurrency: 'AED'; // Admin enters prices in AED
+}
+
+// Utility functions for exchange rate calculations
+export const calculateSDGPrice = (aedPrice: number, exchangeRate: number): number => {
+  return Math.round(aedPrice * exchangeRate);
+};
+
+export const validateExchangeRate = (rate: number): { isValid: boolean; error?: string } => {
+  if (rate <= 0) {
+    return { isValid: false, error: 'سعر الصرف يجب أن يكون أكبر من صفر' };
+  }
+  if (rate > 1000) {
+    return { isValid: false, error: 'سعر الصرف مرتفع جداً، يرجى التحقق من القيمة' };
+  }
+  return { isValid: true };
+};
+
+export interface SparePartSelection {
+  partId: string;
+  quantity: number;
+  type: 'original' | 'commercial';
+  part: SparePart;
 }
 
 export interface SparePartCategory {
@@ -62,6 +109,7 @@ export interface OrderItem {
   orderId: string;
   sparePartId: string;
   quantity: number;
+  type: 'original' | 'commercial';
   requestedPrice?: number;
   approvedPrice?: number;
   sparePart: SparePart;
@@ -841,9 +889,13 @@ export const validateSparePart = (part: Omit<SparePart, 'id' | 'createdAt' | 'up
     errors.countryOfOrigin = 'Country of origin is required';
   }
 
-  // Validate price if provided
-  if (part.price !== undefined && (part.price < 0 || isNaN(part.price))) {
-    errors.price = 'Price must be a positive number';
+  // Validate prices if provided
+  if (part.prices?.original?.aed !== undefined && (part.prices.original.aed < 0 || isNaN(part.prices.original.aed))) {
+    errors['prices.original.aed'] = 'Original price must be a positive number';
+  }
+  
+  if (part.prices?.commercial?.aed !== undefined && (part.prices.commercial.aed < 0 || isNaN(part.prices.commercial.aed))) {
+    errors['prices.commercial.aed'] = 'Commercial price must be a positive number';
   }
 
   return {

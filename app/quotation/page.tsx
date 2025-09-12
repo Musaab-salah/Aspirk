@@ -251,12 +251,22 @@ export default function QuotationPage() {
                     onClick={() => handleMethodSelect(method.id)}
                     className={`relative p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-lg ${
                       selectedMethod === method.id
-                        ? `border-${method.color}-500 bg-${method.color}-50`
+                        ? method.color === 'primary' 
+                          ? 'border-primary-500 bg-primary-50'
+                          : method.color === 'success'
+                          ? 'border-success-500 bg-success-50'
+                          : 'border-warning-500 bg-warning-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     {selectedMethod === method.id && (
-                      <div className={`absolute top-3 right-3 w-6 h-6 bg-${method.color}-500 rounded-full flex items-center justify-center`}>
+                      <div className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center ${
+                        method.color === 'primary' 
+                          ? 'bg-primary-500'
+                          : method.color === 'success'
+                          ? 'bg-success-500'
+                          : 'bg-warning-500'
+                      }`}>
                         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -264,8 +274,20 @@ export default function QuotationPage() {
                     )}
                     
                     <div className="text-center">
-                      <div className={`w-16 h-16 bg-${method.color}-100 rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                        <method.icon className={`h-8 w-8 text-${method.color}-600`} />
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+                        method.color === 'primary' 
+                          ? 'bg-primary-100'
+                          : method.color === 'success'
+                          ? 'bg-success-100'
+                          : 'bg-warning-100'
+                      }`}>
+                        <method.icon className={`h-8 w-8 ${
+                          method.color === 'primary' 
+                            ? 'text-primary-600'
+                            : method.color === 'success'
+                            ? 'text-success-600'
+                            : 'text-warning-600'
+                        }`} />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2 font-arabic">
                         {method.nameAr}

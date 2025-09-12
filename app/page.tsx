@@ -171,7 +171,8 @@ export default function HomePage() {
             </h1>
             
             <p className="text-xl lg:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto font-arabic leading-relaxed animate-in fade-in duration-1000 animation-delay-300">
-              خدمة موثوقة وسريعة لطلب قطع غيار السيارات من كل مكان. نضمن لك الجودة والأسعار المنافسة مع خدمة عملاء متميزة
+              خدمة موثوقة وسريعة ل
+              السيارات من كل مكان. نضمن لك الجودة والأسعار المنافسة مع خدمة عملاء متميزة
             </p>
 
             {/* Search Bar */}
