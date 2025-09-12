@@ -8,6 +8,7 @@ import Footer from '@/components/Footer'
 import ShippingForm from '@/components/ShippingForm'
 
 import { SparePart, validateShippingFields, calculateShippingCost, COUNTRIES, ExchangeRateConfig, calculateSDGPrice } from '@/types'
+import { formatUserPrice } from '@/utils/priceUtils'
 
 // Mock data - in real app this would come from API
 const mockSpareParts: SparePart[] = [
@@ -290,10 +291,7 @@ export default function RequestSummaryPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-primary-600">
-                      {exchangeRate ? 
-                        `${calculateSDGPrice(part.prices.commercial.aed, exchangeRate.aedToSdg)} SDG` : 
-                        `${part.prices.commercial.aed} AED`
-                      }
+                      {exchangeRate ? formatUserPrice(part.prices.commercial.aed, exchangeRate.aedToSdg) : `${part.prices.commercial.sdg} SDG`}
                     </p>
                     <p className="text-xs text-gray-500 font-arabic">(سعر تقريبي)</p>
                   </div>
@@ -306,10 +304,7 @@ export default function RequestSummaryPage() {
                     إجمالي السعر التقريبي:
                   </span>
                   <span className="text-xl font-bold text-primary-600">
-                    {exchangeRate ? 
-                      `${calculateSDGPrice(totalEstimatedPrice, exchangeRate.aedToSdg)} SDG` : 
-                      `${totalEstimatedPrice} AED`
-                    }
+                    {exchangeRate ? formatUserPrice(totalEstimatedPrice, exchangeRate.aedToSdg) : `${totalEstimatedPrice} SDG`}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1 font-arabic">
@@ -347,7 +342,7 @@ export default function RequestSummaryPage() {
                             <div className="flex justify-between">
                               <span>تكلفة الشحن:</span>
                               <span className="font-medium text-primary-600">
-                                {shippingCost.baseCost} {shippingCost.currency}
+                                {shippingCost.baseCost} SDG
                               </span>
                             </div>
                             <div className="flex justify-between">

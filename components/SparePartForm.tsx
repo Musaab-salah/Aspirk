@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect, useRef } from 'react'
+import { XMarkIcon, CheckIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { SparePart, COUNTRIES } from '@/types'
 
 interface SparePartFormProps {
@@ -43,6 +43,10 @@ export default function SparePartForm({
     isAvailable: true
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [uploadedImagePath, setUploadedImagePath] = useState<string>('')
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (editingPart) {
@@ -60,6 +64,7 @@ export default function SparePartForm({
         countryOfOrigin: editingPart.countryOfOrigin,
         isAvailable: editingPart.isAvailable
       })
+      setUploadedImagePath(editingPart.image || '')
     } else {
       setFormData({
         partNumber: '',
@@ -75,7 +80,9 @@ export default function SparePartForm({
         countryOfOrigin: '',
         isAvailable: true
       })
+      setUploadedImagePath('')
     }
+    setUploadedFile(null)
     setErrors({})
   }, [editingPart, isOpen])
 
@@ -147,6 +154,70 @@ export default function SparePartForm({
         category: category.name,
         categoryAr: category.nameAr
       }))
+    }
+  }
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true)
+    setErrors(prev => ({ ...prev, image: '' }))
+
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'فشل في رفع الصورة')
+      }
+
+      setUploadedFile(file)
+      setUploadedImagePath(result.data.path)
+      setFormData(prev => ({ ...prev, image: result.data.path }))
+
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      setErrors(prev => ({ 
+        ...prev, 
+        image: error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الصورة' 
+      }))
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleFileUpload(file)
+    }
+  }
+
+  const handleRemoveImage = async () => {
+    if (uploadedImagePath && uploadedImagePath.startsWith('/storage/')) {
+      try {
+        const filename = uploadedImagePath.split('/').pop()
+        if (filename) {
+          await fetch(`/api/admin/upload?filename=${filename}`, {
+            method: 'DELETE',
+          })
+        }
+      } catch (error) {
+        console.error('Error deleting file:', error)
+      }
+    }
+
+    setUploadedFile(null)
+    setUploadedImagePath('')
+    setFormData(prev => ({ ...prev, image: '' }))
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
     }
   }
 
@@ -293,6 +364,9 @@ export default function SparePartForm({
                 }`}
                 placeholder="65.00"
               />
+              <p className="text-xs text-gray-500 mt-1 font-arabic">
+                سيتم تحويل السعر تلقائياً إلى جنيه سوداني
+              </p>
               {errors.originalPriceAed && (
                 <p className="text-red-600 text-sm mt-1 font-arabic">{errors.originalPriceAed}</p>
               )}
@@ -313,6 +387,9 @@ export default function SparePartForm({
                 }`}
                 placeholder="45.00"
               />
+              <p className="text-xs text-gray-500 mt-1 font-arabic">
+                سيتم تحويل السعر تلقائياً إلى جنيه سوداني
+              </p>
               {errors.commercialPriceAed && (
                 <p className="text-red-600 text-sm mt-1 font-arabic">{errors.commercialPriceAed}</p>
               )}
@@ -338,18 +415,70 @@ export default function SparePartForm({
             </select>
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 font-arabic">
-              رابط الصورة
+              صورة القطعة
             </label>
-            <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => handleInputChange('image', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="https://example.com/image.jpg"
-            />
+            
+            {/* File Upload Area */}
+            <div className="space-y-3">
+              {/* Upload Button */}
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className={`flex items-center space-x-2 space-x-reverse px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-400 transition-colors ${
+                    isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                  }`}
+                >
+                  <PhotoIcon className="h-5 w-5 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700 font-arabic">
+                    {isUploading ? 'جاري الرفع...' : 'اختر صورة'}
+                  </span>
+                </button>
+              </div>
+
+              {/* File Info */}
+              <div className="text-xs text-gray-500 font-arabic">
+                الأنواع المسموحة: JPG, JPEG, PNG, WEBP • الحد الأقصى: 2 ميجابايت
+              </div>
+
+              {/* Image Preview */}
+              {uploadedImagePath && (
+                <div className="relative">
+                  <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                    <img
+                      src={uploadedImagePath}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                    title="حذف الصورة"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Error Message */}
+              {errors.image && (
+                <p className="text-red-600 text-sm font-arabic">{errors.image}</p>
+              )}
+            </div>
           </div>
 
           {/* Availability */}

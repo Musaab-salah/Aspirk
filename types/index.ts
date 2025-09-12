@@ -123,7 +123,7 @@ export interface Order {
   status: 'pending' | 'approved' | 'rejected' | 'shipped' | 'delivered';
   totalAmount: number;
   shippingCost: number;
-  currency: 'AED' | 'USD';
+  currency: 'SDG';
   shippingMethod: 'air' | 'land';
   destinationCountry: string;
   notes?: string;
@@ -169,7 +169,7 @@ export interface Invoice {
   invoiceNumber: string;
   totalAmount: number;
   shippingCost: number;
-  currency: 'AED' | 'USD';
+  currency: 'SDG';
   status: 'pending' | 'paid' | 'cancelled';
   paymentMethod?: string;
   paidAt?: Date;
@@ -228,7 +228,7 @@ export interface ShippingCost {
   method: 'air' | 'land';
   country: string;
   baseCost: number;
-  currency: 'AED' | 'USD';
+  currency: 'SDG';
   estimatedDays: number;
   isAvailable: boolean;
 }
@@ -806,7 +806,7 @@ export const calculateShippingCost = (method: 'air' | 'land', country: string): 
       method,
       country,
       baseCost: 0,
-      currency: 'AED',
+      currency: 'SDG',
       estimatedDays: 0,
       isAvailable: false
     };
@@ -816,7 +816,7 @@ export const calculateShippingCost = (method: 'air' | 'land', country: string): 
     method,
     country,
     baseCost: countryData.cost,
-    currency: 'AED',
+    currency: 'SDG',
     estimatedDays: countryData.days,
     isAvailable: true
   };

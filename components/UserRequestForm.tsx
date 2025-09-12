@@ -383,7 +383,7 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
                     />
                   </div>
                   <p className="text-sm text-gray-600 font-arabic mb-2">{part.name}</p>
-                  <p className="text-lg font-bold text-primary-600">{part.price} AED</p>
+                  <p className="text-lg font-bold text-primary-600">{part.price} SDG</p>
                   <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-arabic">
                     {part.category}
                   </span>
@@ -474,7 +474,7 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
               <div className="border-t border-gray-200 mt-4 pt-4">
                 <div className="flex justify-between items-center font-bold text-lg">
                   <span className="font-arabic">إجمالي المبلغ</span>
-                  <span className="text-primary-600">{totalEstimatedPrice} AED</span>
+                  <span className="text-primary-600">{totalEstimatedPrice} SDG</span>
                 </div>
               </div>
             </div>

@@ -382,13 +382,7 @@ export default function OrderReviewPage() {
                         <td className="py-4 px-4">
                           <div className="space-y-1">
                             <div className="text-sm font-semibold text-primary-600">
-                              {item.part.prices[item.type].aed} AED
-                            </div>
-                            <div className="text-xs text-success-600">
                               {item.part.prices[item.type].sdg} SDG
-                            </div>
-                            <div className="text-xs text-warning-600">
-                              ${item.part.prices[item.type].usd} USD
                             </div>
                           </div>
                         </td>
@@ -412,13 +406,7 @@ export default function OrderReviewPage() {
                         <td className="py-4 px-4">
                           <div className="space-y-1">
                             <div className="text-sm font-semibold text-primary-600">
-                              {item.totalPrice} AED
-                            </div>
-                            <div className="text-xs text-success-600">
                               {item.part.prices[item.type].sdg * item.quantity} SDG
-                            </div>
-                            <div className="text-xs text-warning-600">
-                              ${item.part.prices[item.type].usd * item.quantity} USD
                             </div>
                           </div>
                         </td>
@@ -443,13 +431,7 @@ export default function OrderReviewPage() {
                     <span className="text-xl font-semibold text-gray-900 font-arabic">المجموع الكلي:</span>
                     <div className="text-right space-y-1">
                       <div className="text-2xl font-bold text-primary-600">
-                        {getTotalPrice()} AED
-                      </div>
-                      <div className="text-lg font-semibold text-success-600">
                         {orderItems.reduce((total, item) => total + (item.part.prices[item.type].sdg * item.quantity), 0)} SDG
-                      </div>
-                      <div className="text-lg font-semibold text-warning-600">
-                        ${orderItems.reduce((total, item) => total + (item.part.prices[item.type].usd * item.quantity), 0)} USD
                       </div>
                     </div>
                   </div>

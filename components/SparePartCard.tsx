@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { CheckIcon, PhotoIcon, TagIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline'
 import { SparePart, SparePartSelection, calculateSDGPrice } from '@/types'
+import { formatUserPrice } from '@/utils/priceUtils'
 
 interface SparePartCardProps {
   part: SparePart
@@ -37,7 +38,7 @@ export default function SparePartCard({
       <div className="relative h-48 bg-gray-100 rounded-t-lg overflow-hidden">
         {!imageError && part.image ? (
           <img
-            src={part.image}
+            src={part.image.startsWith('/storage/') ? part.image : part.image}
             alt={part.nameAr}
             className="w-full h-full object-cover"
             onError={() => setImageError(true)}
@@ -112,7 +113,7 @@ export default function SparePartCard({
           </div>
           <div className="bg-success-50 p-3 rounded-lg text-center border border-success-200">
             <div className="text-2xl font-bold text-success-700 font-english">
-              {calculateSDGPrice(currentPrices.aed, exchangeRate)} SDG
+              {formatUserPrice(currentPrices.aed, exchangeRate)}
             </div>
             <div className="text-xs text-success-600 font-arabic mt-1">
               جنيه سوداني

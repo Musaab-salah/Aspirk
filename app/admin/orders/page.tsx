@@ -23,7 +23,7 @@ const mockOrders: Order[] = [
     status: 'pending',
     totalAmount: 450,
     shippingCost: 85,
-    currency: 'AED',
+    currency: 'SDG',
     shippingMethod: 'air',
     destinationCountry: 'EG',
     notes: 'Need urgent delivery',
@@ -57,7 +57,7 @@ const mockOrders: Order[] = [
     status: 'approved',
     totalAmount: 320,
     shippingCost: 150,
-    currency: 'AED',
+    currency: 'SDG',
     shippingMethod: 'air',
     destinationCountry: 'NG',
     notes: 'Standard delivery is fine',
@@ -91,7 +91,7 @@ const mockOrders: Order[] = [
     status: 'rejected',
     totalAmount: 280,
     shippingCost: 100,
-    currency: 'AED',
+    currency: 'SDG',
     shippingMethod: 'air',
     destinationCountry: 'KE',
     notes: 'Budget constraint',
@@ -486,11 +486,11 @@ export default function AdminOrdersPage() {
                 </div>
                 <div>
                   <span className="font-medium text-gray-700 font-arabic">المبلغ الإجمالي:</span>
-                  <span className="mr-2">{selectedOrder.totalAmount} {selectedOrder.currency}</span>
+                  <span className="mr-2">{selectedOrder.totalAmount} SDG</span>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700 font-arabic">تكلفة الشحن:</span>
-                  <span className="mr-2">{selectedOrder.shippingCost} {selectedOrder.currency}</span>
+                  <span className="mr-2">{selectedOrder.shippingCost} SDG</span>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700 font-arabic">طريقة الشحن:</span>

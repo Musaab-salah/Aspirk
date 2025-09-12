@@ -59,7 +59,7 @@ const mockRecentOrders: Order[] = [
     status: 'pending',
     totalAmount: 450,
     shippingCost: 50,
-    currency: 'AED',
+    currency: 'SDG',
     shippingMethod: 'air',
     destinationCountry: 'EG',
     createdAt: new Date('2024-01-15T10:30:00'),
@@ -91,7 +91,7 @@ const mockRecentOrders: Order[] = [
     status: 'approved',
     totalAmount: 320,
     shippingCost: 40,
-    currency: 'AED',
+    currency: 'SDG',
     shippingMethod: 'land',
     destinationCountry: 'NG',
     createdAt: new Date('2024-01-14T15:45:00'),
@@ -123,7 +123,7 @@ const mockRecentOrders: Order[] = [
     status: 'shipped',
     totalAmount: 280,
     shippingCost: 150,
-    currency: 'AED',
+    currency: 'SDG',
     shippingMethod: 'air',
     destinationCountry: 'KE',
     createdAt: new Date('2024-01-13T09:15:00'),
@@ -743,7 +743,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-gray-900 text-lg font-english">
-                          {order.totalAmount.toLocaleString()} {order.currency}
+                          {order.totalAmount.toLocaleString()} SDG
                         </p>
                         <div className="flex flex-col items-end space-y-2 mt-2">
                           <span className={`inline-block px-3 py-1.5 text-xs rounded-full font-arabic font-medium ${getStatusClass(order.status)}`}>
@@ -878,7 +878,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-arabic text-sm">الإيرادات اليوم</span>
-                  <span className="font-bold font-english">3,450 AED</span>
+                  <span className="font-bold font-english">3,450 SDG</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-arabic text-sm">العملاء الجدد</span>

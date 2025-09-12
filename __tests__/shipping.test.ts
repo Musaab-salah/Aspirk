@@ -58,7 +58,7 @@ describe('Shipping Validation', () => {
       expect(result.isAvailable).toBe(true)
       expect(result.baseCost).toBe(50)
       expect(result.estimatedDays).toBe(1)
-      expect(result.currency).toBe('AED')
+      expect(result.currency).toBe('SDG')
     })
 
     it('should calculate correct land shipping cost for Saudi Arabia', () => {
@@ -66,7 +66,7 @@ describe('Shipping Validation', () => {
       expect(result.isAvailable).toBe(true)
       expect(result.baseCost).toBe(50)
       expect(result.estimatedDays).toBe(3)
-      expect(result.currency).toBe('AED')
+      expect(result.currency).toBe('SDG')
     })
 
     it('should return unavailable for unsupported method-country combination', () => {
@@ -88,7 +88,7 @@ describe('Shipping Validation', () => {
       expect(result.isAvailable).toBe(true)
       expect(result.baseCost).toBe(150)
       expect(result.estimatedDays).toBe(5)
-      expect(result.currency).toBe('AED')
+      expect(result.currency).toBe('SDG')
     })
   })
 

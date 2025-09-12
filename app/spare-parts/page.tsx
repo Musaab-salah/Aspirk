@@ -131,8 +131,8 @@ export default function SparePartsPage() {
       part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       part.descriptionAr?.includes(searchQuery) ||
       part.partNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesPrice = (!priceRange.min || (part.prices.commercial.aed && part.prices.commercial.aed >= parseInt(priceRange.min))) &&
-                        (!priceRange.max || (part.prices.commercial.aed && part.prices.commercial.aed <= parseInt(priceRange.max)))
+    const matchesPrice = (!priceRange.min || (part.prices.commercial.sdg && part.prices.commercial.sdg >= parseInt(priceRange.min))) &&
+                        (!priceRange.max || (part.prices.commercial.sdg && part.prices.commercial.sdg <= parseInt(priceRange.max)))
     const matchesAvailability = !showAvailableOnly || part.isAvailable
     const matchesCountry = !countryFilter || part.countryOfOrigin === countryFilter
 
