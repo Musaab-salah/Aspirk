@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ExchangeRateConfig, validateExchangeRate } from '@/types'
-import { updateExchangeRate } from '../spare-parts/route'
-
-// Mock storage - in real app this would be in a database
-let exchangeRateConfig: ExchangeRateConfig = {
-  id: '1',
-  aedToSdg: 30, // Default exchange rate: 1 AED = 30 SDG
-  lastUpdated: new Date(),
-  updatedBy: 'admin'
-}
+import { validateExchangeRate } from '@/types'
+import { getExchangeRateConfig, updateExchangeRate } from '@/utils/exchangeRateUtils'
 
 export async function GET() {
   try {
     return NextResponse.json({
       success: true,
-      data: exchangeRateConfig
+      data: getExchangeRateConfig()
     })
   } catch (error) {
     console.error('Error fetching exchange rate:', error)
@@ -43,19 +35,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the exchange rate
-    exchangeRateConfig = {
-      id: exchangeRateConfig.id,
-      aedToSdg,
-      lastUpdated: new Date(),
-      updatedBy: updatedBy || 'admin'
-    }
-
-    // Update all spare parts with new SDG prices
-    updateExchangeRate(aedToSdg)
+    const updatedConfig = updateExchangeRate(aedToSdg)
 
     return NextResponse.json({
       success: true,
-      data: exchangeRateConfig,
+      data: updatedConfig,
       message: 'Exchange rate updated successfully'
     })
   } catch (error) {

@@ -13,6 +13,8 @@ import {
   TruckIcon,
   BellIcon,
   UserCircleIcon,
+  MapPinIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -20,6 +22,9 @@ const navigation = [
   { name: 'الطلبات', href: '/admin/orders', icon: ShoppingCartIcon },
   { name: 'العملاء', href: '/admin/customers', icon: UsersIcon },
   { name: 'قطع الغيار', href: '/admin/spare-parts', icon: CogIcon },
+  { name: 'الولايات', href: '/admin/states', icon: MapPinIcon },
+  { name: 'المدن', href: '/admin/cities', icon: MapPinIcon },
+  { name: 'تكاليف الشحن', href: '/admin/delivery-costs', icon: CurrencyDollarIcon },
   { name: 'الموردين', href: '/admin/suppliers', icon: TruckIcon },
   { name: 'التقارير', href: '/admin/reports', icon: ChartBarIcon },
   { name: 'الفاتورات', href: '/admin/invoices', icon: DocumentTextIcon },

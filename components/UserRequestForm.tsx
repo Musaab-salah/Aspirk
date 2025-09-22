@@ -10,8 +10,9 @@ import {
   ExclamationTriangleIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline'
-import ShippingForm from './ShippingForm'
-import { validateShippingFields, ShippingValidation } from '@/types'
+import CityShippingForm from './CityShippingForm'
+import ShippingDeliveryModal from './ShippingDeliveryModal'
+import { validateCityShippingFields, CityShippingValidation } from '@/types'
 
 interface UserRequestFormProps {
   className?: string
@@ -32,11 +33,12 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
   const [selectedParts, setSelectedParts] = useState<string[]>([])
   const [totalEstimatedPrice, setTotalEstimatedPrice] = useState(0)
   const [shippingMethod, setShippingMethod] = useState('')
-  const [destinationCountry, setDestinationCountry] = useState('')
-  const [validation, setValidation] = useState<ShippingValidation | undefined>(undefined)
+  const [cityId, setCityId] = useState('')
+  const [validation, setValidation] = useState<CityShippingValidation | undefined>(undefined)
   const [showValidation, setShowValidation] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
+  const [showShippingModal, setShowShippingModal] = useState(false)
   const router = useRouter()
 
   // Mock spare parts data
@@ -69,11 +71,6 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate shipping fields
-    const shippingValidation = validateShippingFields(shippingMethod, destinationCountry)
-    setValidation(shippingValidation)
-    setShowValidation(true)
-
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       alert('يرجى ملء جميع الحقول المطلوبة')
       return
@@ -89,11 +86,13 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
       return
     }
 
-    if (!shippingValidation.isValid) {
-      return
-    }
+    // Show shipping modal instead of direct submission
+    setShowShippingModal(true)
+  }
 
+  const handleShippingConfirm = async (shippingMethod: string, cityId: string) => {
     setIsSubmitting(true)
+    setShowShippingModal(false)
 
     try {
       const requestData = {
@@ -102,7 +101,7 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
         selectedParts,
         totalEstimatedPrice,
         shippingMethod,
-        destinationCountry,
+        cityId,
         notes: customerInfo.notes
       }
 
@@ -447,14 +446,15 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
               </div>
             </div>
 
-            <ShippingForm
-              shippingMethod={shippingMethod}
-              setShippingMethod={setShippingMethod}
-              destinationCountry={destinationCountry}
-              setDestinationCountry={setDestinationCountry}
-              validation={validation}
-              showValidation={showValidation}
-            />
+            {/* Note about shipping selection */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2 font-arabic">
+                معلومات الشحن
+              </h3>
+              <p className="text-blue-700 font-arabic text-sm">
+                سيتم طلب اختيار طريقة الشحن والولاية في الخطوة التالية
+              </p>
+            </div>
 
             {/* Final Summary */}
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 mt-6">
@@ -489,7 +489,7 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !shippingMethod || !destinationCountry}
+                disabled={isSubmitting || !shippingMethod || !cityId}
                 className="btn-success disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
@@ -505,6 +505,15 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
           </div>
         )}
       </form>
+
+      {/* Shipping Delivery Modal */}
+      <ShippingDeliveryModal
+        isOpen={showShippingModal}
+        onClose={() => setShowShippingModal(false)}
+        onConfirm={handleShippingConfirm}
+        selectedParts={availableParts.filter(part => selectedParts.includes(part.id))}
+        totalPrice={totalEstimatedPrice}
+      />
     </div>
   )
 }

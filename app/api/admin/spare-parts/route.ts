@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { SparePart, ExchangeRateConfig, calculateSDGPrice } from '@/types'
+import { SparePart, calculateSDGPrice } from '@/types'
+import { getCurrentExchangeRate, updateSDGPrices } from '@/utils/exchangeRateUtils'
 
 // Mock database - in real app this would be a proper database
 let spareParts: SparePart[] = [
@@ -41,43 +42,13 @@ let spareParts: SparePart[] = [
   },
 ]
 
-// Shared exchange rate - in real app this would be in a shared database
-let currentExchangeRate = 30 // Default exchange rate: 1 AED = 30 SDG
-
-// Helper function to get current exchange rate
-function getCurrentExchangeRate(): number {
-  return currentExchangeRate
-}
-
 // Function to update exchange rate (called from exchange-rate API)
 export function updateExchangeRate(newRate: number) {
-  currentExchangeRate = newRate
   // Update all existing spare parts with new SDG prices
   spareParts.forEach(part => {
     part.prices.original.sdg = calculateSDGPrice(part.prices.original.aed, newRate)
     part.prices.commercial.sdg = calculateSDGPrice(part.prices.commercial.aed, newRate)
   })
-}
-
-// Helper function to update SDG prices based on current exchange rate
-function updateSDGPrices(part: Omit<SparePart, 'id'>): Omit<SparePart, 'id'> {
-  const exchangeRate = getCurrentExchangeRate()
-  
-  return {
-    ...part,
-    prices: {
-      original: {
-        aed: part.prices.original.aed,
-        sdg: calculateSDGPrice(part.prices.original.aed, exchangeRate),
-        usd: part.prices.original.usd
-      },
-      commercial: {
-        aed: part.prices.commercial.aed,
-        sdg: calculateSDGPrice(part.prices.commercial.aed, exchangeRate),
-        usd: part.prices.commercial.usd
-      }
-    }
-  }
 }
 
 export async function GET() {

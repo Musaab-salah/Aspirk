@@ -124,8 +124,8 @@ export interface Order {
   totalAmount: number;
   shippingCost: number;
   currency: 'SDG';
-  shippingMethod: 'air' | 'land';
-  destinationCountry: string;
+  shippingMethod: 'land' | 'sea';
+  cityId: string;
   notes?: string;
   adminNotes?: string;
   expectedShippingDate?: Date;
@@ -149,6 +149,17 @@ export interface Supplier {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  nameAr: string;
+  description: string;
+  descriptionAr: string;
+  icon: string;
+  accountNumber?: string;
+  isActive: boolean;
 }
 
 export interface Notification {
@@ -225,12 +236,13 @@ export interface ShippingValidation {
 }
 
 export interface ShippingCost {
-  method: 'air' | 'land';
-  country: string;
+  method: 'land' | 'sea';
+  cityId: string;
   baseCost: number;
   currency: 'SDG';
   estimatedDays: number;
   isAvailable: boolean;
+  freeShippingThreshold?: number;
 }
 
 export interface Country {
@@ -240,6 +252,97 @@ export interface Country {
   isSupported: boolean;
   supportedMethods: ('air' | 'land')[];
 }
+
+export interface SudaneseCity {
+  id: string;
+  name: string;
+  nameAr: string;
+  active: boolean;
+  state?: string;
+  stateAr?: string;
+}
+
+export interface DeliveryCost {
+  id: string;
+  cityId: string;
+  method: 'land' | 'sea';
+  cost: number;
+  estimatedDays: number;
+  freeShippingThreshold?: number;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Sudanese cities data
+export const SUDANESE_CITIES: SudaneseCity[] = [
+  // Khartoum State
+  { id: '1', name: 'Khartoum', nameAr: 'الخرطوم', active: true, state: 'Khartoum', stateAr: 'ولاية الخرطوم' },
+  { id: '2', name: 'Omdurman', nameAr: 'أم درمان', active: true, state: 'Khartoum', stateAr: 'ولاية الخرطوم' },
+  { id: '3', name: 'Khartoum North', nameAr: 'بحري', active: true, state: 'Khartoum', stateAr: 'ولاية الخرطوم' },
+  
+  // Red Sea State
+  { id: '4', name: 'Port Sudan', nameAr: 'بورتسودان', active: true, state: 'Red Sea', stateAr: 'ولاية البحر الأحمر' },
+  { id: '5', name: 'Suakin', nameAr: 'سواكن', active: true, state: 'Red Sea', stateAr: 'ولاية البحر الأحمر' },
+  
+  // Kassala State
+  { id: '6', name: 'Kassala', nameAr: 'كسلا', active: true, state: 'Kassala', stateAr: 'ولاية كسلا' },
+  { id: '7', name: 'Hamashkoraib', nameAr: 'هماشكوريب', active: true, state: 'Kassala', stateAr: 'ولاية كسلا' },
+  
+  // Gedaref State
+  { id: '8', name: 'Gedaref', nameAr: 'القضارف', active: true, state: 'Gedaref', stateAr: 'ولاية القضارف' },
+  { id: '9', name: 'Gallabat', nameAr: 'القلابات', active: true, state: 'Gedaref', stateAr: 'ولاية القضارف' },
+  
+  // Blue Nile State
+  { id: '10', name: 'Ad-Damazin', nameAr: 'الدمازين', active: true, state: 'Blue Nile', stateAr: 'ولاية النيل الأزرق' },
+  { id: '11', name: 'Roseires', nameAr: 'الروصيرص', active: true, state: 'Blue Nile', stateAr: 'ولاية النيل الأزرق' },
+  
+  // White Nile State
+  { id: '12', name: 'Rabak', nameAr: 'ربك', active: true, state: 'White Nile', stateAr: 'ولاية النيل الأبيض' },
+  { id: '13', name: 'Kosti', nameAr: 'كوستي', active: true, state: 'White Nile', stateAr: 'ولاية النيل الأبيض' },
+  
+  // Sennar State
+  { id: '14', name: 'Sennar', nameAr: 'سنار', active: true, state: 'Sennar', stateAr: 'ولاية سنار' },
+  { id: '15', name: 'Singa', nameAr: 'سنقا', active: true, state: 'Sennar', stateAr: 'ولاية سنار' },
+  
+  // North Kordofan State
+  { id: '16', name: 'El-Obeid', nameAr: 'الأبيض', active: true, state: 'North Kordofan', stateAr: 'ولاية شمال كردفان' },
+  { id: '17', name: 'Bara', nameAr: 'بارا', active: true, state: 'North Kordofan', stateAr: 'ولاية شمال كردفان' },
+  
+  // South Kordofan State
+  { id: '18', name: 'Kadugli', nameAr: 'كادقلي', active: true, state: 'South Kordofan', stateAr: 'ولاية جنوب كردفان' },
+  { id: '19', name: 'Dilling', nameAr: 'الدلنج', active: true, state: 'South Kordofan', stateAr: 'ولاية جنوب كردفان' },
+  
+  // West Kordofan State
+  { id: '20', name: 'El-Fula', nameAr: 'الفولة', active: true, state: 'West Kordofan', stateAr: 'ولاية غرب كردفان' },
+  { id: '21', name: 'Babanusa', nameAr: 'بابنوسة', active: true, state: 'West Kordofan', stateAr: 'ولاية غرب كردفان' },
+  
+  // North Darfur State
+  { id: '22', name: 'El-Fasher', nameAr: 'الفاشر', active: true, state: 'North Darfur', stateAr: 'ولاية شمال دارفور' },
+  { id: '23', name: 'Kutum', nameAr: 'كتم', active: true, state: 'North Darfur', stateAr: 'ولاية شمال دارفور' },
+  
+  // West Darfur State
+  { id: '24', name: 'El-Geneina', nameAr: 'الجنينة', active: true, state: 'West Darfur', stateAr: 'ولاية غرب دارفور' },
+  { id: '25', name: 'Zalingei', nameAr: 'زالنجي', active: true, state: 'West Darfur', stateAr: 'ولاية غرب دارفور' },
+  
+  // South Darfur State
+  { id: '26', name: 'Nyala', nameAr: 'نيالا', active: true, state: 'South Darfur', stateAr: 'ولاية جنوب دارفور' },
+  { id: '27', name: 'Ed-Daein', nameAr: 'الضعين', active: true, state: 'South Darfur', stateAr: 'ولاية جنوب دارفور' },
+  
+  // Central Darfur State
+  { id: '28', name: 'Zalingei', nameAr: 'زالنجي', active: true, state: 'Central Darfur', stateAr: 'ولاية وسط دارفور' },
+  
+  // East Darfur State
+  { id: '29', name: 'Ed-Daein', nameAr: 'الضعين', active: true, state: 'East Darfur', stateAr: 'ولاية شرق دارفور' },
+  
+  // River Nile State
+  { id: '30', name: 'Ed-Damer', nameAr: 'الدامر', active: true, state: 'River Nile', stateAr: 'ولاية نهر النيل' },
+  { id: '31', name: 'Atbara', nameAr: 'عطبرة', active: true, state: 'River Nile', stateAr: 'ولاية نهر النيل' },
+  
+  // Northern State
+  { id: '32', name: 'Dongola', nameAr: 'دنقلا', active: true, state: 'Northern', stateAr: 'الولاية الشمالية' },
+  { id: '33', name: 'Karima', nameAr: 'كريمة', active: true, state: 'Northern', stateAr: 'الولاية الشمالية' }
+];
 
 // Countries data with shipping information - African and Arab countries only
 export const COUNTRIES: Country[] = [
@@ -702,109 +805,61 @@ export const COUNTRIES: Country[] = [
   }
 ];
 
-// Shipping cost calculation function
-export const calculateShippingCost = (method: 'air' | 'land', country: string): ShippingCost => {
-  const baseCosts = {
-    air: {
-      // Arab Countries - Air Shipping
-      'EG': { cost: 85, days: 3 },
-      'SD': { cost: 90, days: 3 },
-      'SA': { cost: 80, days: 2 },
-      'AE': { cost: 50, days: 1 },
-      'QA': { cost: 75, days: 2 },
-      'BH': { cost: 65, days: 2 },
-      'KW': { cost: 70, days: 2 },
-      'OM': { cost: 60, days: 2 },
-      'YE': { cost: 95, days: 3 },
-      'JO': { cost: 90, days: 3 },
-      'LB': { cost: 100, days: 3 },
-      'SY': { cost: 95, days: 3 },
-      'IQ': { cost: 95, days: 3 },
-      'PS': { cost: 90, days: 3 },
-      'DZ': { cost: 110, days: 4 },
-      'TN': { cost: 105, days: 4 },
-      'MA': { cost: 110, days: 4 },
-      'LY': { cost: 100, days: 3 },
-      'MR': { cost: 115, days: 4 },
-      'SO': { cost: 120, days: 4 },
-      'KM': { cost: 125, days: 5 },
-      'DJ': { cost: 110, days: 4 },
-      // African Countries - Air Shipping
-      'NG': { cost: 150, days: 5 },
-      'KE': { cost: 140, days: 5 },
-      'ET': { cost: 145, days: 5 },
-      'GH': { cost: 155, days: 6 },
-      'ZA': { cost: 160, days: 6 },
-      'TZ': { cost: 145, days: 5 },
-      'UG': { cost: 140, days: 5 },
-      'SN': { cost: 150, days: 6 },
-      'RW': { cost: 135, days: 5 },
-      'ZM': { cost: 155, days: 6 },
-      'ZW': { cost: 155, days: 6 },
-      'MW': { cost: 150, days: 6 },
-      'BW': { cost: 160, days: 6 },
-      'NA': { cost: 165, days: 6 },
-      'TD': { cost: 130, days: 5 },
-      'ML': { cost: 145, days: 6 },
-      'NE': { cost: 140, days: 6 },
-      'CF': { cost: 135, days: 5 },
-      'CM': { cost: 150, days: 6 },
-      'CI': { cost: 155, days: 6 },
-      'BF': { cost: 150, days: 6 },
-      'MG': { cost: 170, days: 7 },
-      'AO': { cost: 165, days: 6 },
-      'MZ': { cost: 160, days: 6 },
-      'SS': { cost: 125, days: 4 },
-      'ER': { cost: 130, days: 4 },
-      'SL': { cost: 160, days: 6 },
-      'TG': { cost: 155, days: 6 },
-      'BJ': { cost: 155, days: 6 },
-      'GW': { cost: 165, days: 6 },
-      'GN': { cost: 160, days: 6 },
-      'GM': { cost: 165, days: 6 },
-      'CV': { cost: 170, days: 7 },
-      'ST': { cost: 175, days: 7 },
-      'GQ': { cost: 155, days: 6 },
-      'GA': { cost: 150, days: 6 },
-      'CG': { cost: 145, days: 5 },
-      'CD': { cost: 140, days: 5 },
-      'BI': { cost: 135, days: 5 },
-      'SC': { cost: 180, days: 7 },
-      'MU': { cost: 175, days: 7 },
-      'LS': { cost: 165, days: 6 },
-      'SZ': { cost: 160, days: 6 }
-    },
-    land: {
-      // Arab Countries - Land Shipping (only for countries that support it)
-      'EG': { cost: 60, days: 4 },
-      'SD': { cost: 70, days: 5 },
-      'SA': { cost: 50, days: 3 },
-      'AE': { cost: 30, days: 1 },
-      'QA': { cost: 55, days: 3 },
-      'BH': { cost: 40, days: 2 },
-      'KW': { cost: 45, days: 3 },
-      'OM': { cost: 35, days: 2 },
-      'YE': { cost: 75, days: 5 },
-      'JO': { cost: 70, days: 5 },
-      'SY': { cost: 75, days: 5 },
-      'IQ': { cost: 75, days: 5 },
-      'PS': { cost: 70, days: 5 },
-      'DZ': { cost: 85, days: 6 },
-      'TN': { cost: 80, days: 6 },
-      'MA': { cost: 85, days: 6 },
-      'LY': { cost: 75, days: 5 },
-      'MR': { cost: 90, days: 6 },
-      'DJ': { cost: 80, days: 5 }
-      // Note: African countries don't support land shipping
-    }
-  };
-
-  const countryData = baseCosts[method][country as keyof typeof baseCosts[typeof method]];
+// Default delivery costs for Sudanese cities
+export const DEFAULT_DELIVERY_COSTS: DeliveryCost[] = [
+  // Khartoum State - Major cities with both land and sea access
+  { id: '1', cityId: '1', method: 'land', cost: 50, estimatedDays: 2, freeShippingThreshold: 1000, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '2', cityId: '1', method: 'sea', cost: 80, estimatedDays: 5, freeShippingThreshold: 1500, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '3', cityId: '2', method: 'land', cost: 55, estimatedDays: 2, freeShippingThreshold: 1000, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '4', cityId: '2', method: 'sea', cost: 85, estimatedDays: 5, freeShippingThreshold: 1500, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '5', cityId: '3', method: 'land', cost: 52, estimatedDays: 2, freeShippingThreshold: 1000, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '6', cityId: '3', method: 'sea', cost: 82, estimatedDays: 5, freeShippingThreshold: 1500, active: true, createdAt: new Date(), updatedAt: new Date() },
   
-  if (!countryData) {
+  // Red Sea State - Coastal cities with better sea access
+  { id: '7', cityId: '4', method: 'land', cost: 120, estimatedDays: 4, freeShippingThreshold: 1200, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '8', cityId: '4', method: 'sea', cost: 60, estimatedDays: 3, freeShippingThreshold: 800, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '9', cityId: '5', method: 'land', cost: 130, estimatedDays: 4, freeShippingThreshold: 1200, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '10', cityId: '5', method: 'sea', cost: 65, estimatedDays: 3, freeShippingThreshold: 800, active: true, createdAt: new Date(), updatedAt: new Date() },
+  
+  // Eastern states - More expensive land, moderate sea
+  { id: '11', cityId: '6', method: 'land', cost: 100, estimatedDays: 3, freeShippingThreshold: 1100, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '12', cityId: '6', method: 'sea', cost: 90, estimatedDays: 4, freeShippingThreshold: 1300, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '13', cityId: '8', method: 'land', cost: 95, estimatedDays: 3, freeShippingThreshold: 1100, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '14', cityId: '8', method: 'sea', cost: 85, estimatedDays: 4, freeShippingThreshold: 1300, active: true, createdAt: new Date(), updatedAt: new Date() },
+  
+  // Southern states - Moderate costs
+  { id: '15', cityId: '10', method: 'land', cost: 80, estimatedDays: 3, freeShippingThreshold: 1000, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '16', cityId: '10', method: 'sea', cost: 100, estimatedDays: 6, freeShippingThreshold: 1400, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '17', cityId: '12', method: 'land', cost: 75, estimatedDays: 3, freeShippingThreshold: 1000, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '18', cityId: '12', method: 'sea', cost: 95, estimatedDays: 5, freeShippingThreshold: 1400, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '19', cityId: '13', method: 'land', cost: 78, estimatedDays: 3, freeShippingThreshold: 1000, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '20', cityId: '13', method: 'sea', cost: 98, estimatedDays: 5, freeShippingThreshold: 1400, active: true, createdAt: new Date(), updatedAt: new Date() },
+  
+  // Western states - Higher costs due to distance
+  { id: '21', cityId: '16', method: 'land', cost: 110, estimatedDays: 4, freeShippingThreshold: 1200, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '22', cityId: '16', method: 'sea', cost: 140, estimatedDays: 7, freeShippingThreshold: 1600, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '23', cityId: '22', method: 'land', cost: 150, estimatedDays: 5, freeShippingThreshold: 1300, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '24', cityId: '22', method: 'sea', cost: 180, estimatedDays: 8, freeShippingThreshold: 1800, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '25', cityId: '26', method: 'land', cost: 140, estimatedDays: 5, freeShippingThreshold: 1300, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '26', cityId: '26', method: 'sea', cost: 170, estimatedDays: 8, freeShippingThreshold: 1800, active: true, createdAt: new Date(), updatedAt: new Date() },
+  
+  // Northern states - Moderate to high costs
+  { id: '27', cityId: '31', method: 'land', cost: 90, estimatedDays: 3, freeShippingThreshold: 1100, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '28', cityId: '31', method: 'sea', cost: 110, estimatedDays: 6, freeShippingThreshold: 1400, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '29', cityId: '32', method: 'land', cost: 105, estimatedDays: 4, freeShippingThreshold: 1200, active: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: '30', cityId: '32', method: 'sea', cost: 125, estimatedDays: 6, freeShippingThreshold: 1500, active: true, createdAt: new Date(), updatedAt: new Date() }
+];
+
+// Shipping cost calculation function for Sudanese cities
+export const calculateShippingCost = (method: 'land' | 'sea', cityId: string, orderTotal?: number): ShippingCost => {
+  const deliveryCost = DEFAULT_DELIVERY_COSTS.find(
+    cost => cost.cityId === cityId && cost.method === method && cost.active
+  );
+  
+  if (!deliveryCost) {
     return {
       method,
-      country,
+      cityId,
       baseCost: 0,
       currency: 'SDG',
       estimatedDays: 0,
@@ -812,17 +867,70 @@ export const calculateShippingCost = (method: 'air' | 'land', country: string): 
     };
   }
 
+  // Check if free shipping applies
+  const isFreeShipping = orderTotal && deliveryCost.freeShippingThreshold && 
+                        orderTotal >= deliveryCost.freeShippingThreshold;
+
   return {
     method,
-    country,
-    baseCost: countryData.cost,
+    cityId,
+    baseCost: isFreeShipping ? 0 : deliveryCost.cost,
     currency: 'SDG',
-    estimatedDays: countryData.days,
-    isAvailable: true
+    estimatedDays: deliveryCost.estimatedDays,
+    isAvailable: true,
+    freeShippingThreshold: deliveryCost.freeShippingThreshold
   };
 };
 
-// Validation functions
+// Validation functions for city-based shipping
+export interface CityShippingValidation {
+  isValid: boolean;
+  errors: {
+    shippingMethod?: string;
+    cityId?: string;
+  };
+}
+
+export const validateCityShippingFields = (
+  shippingMethod: string,
+  cityId: string
+): CityShippingValidation => {
+  const errors: { shippingMethod?: string; cityId?: string } = {};
+
+  // Validate shipping method
+  if (!shippingMethod) {
+    errors.shippingMethod = 'يرجى اختيار طريقة الشحن';
+  } else if (!['land', 'sea'].includes(shippingMethod)) {
+    errors.shippingMethod = 'يرجى اختيار طريقة شحن صالحة';
+  }
+
+  // Validate city
+  if (!cityId) {
+    errors.cityId = 'يرجى اختيار المدينة';
+  } else {
+    const city = SUDANESE_CITIES.find((c: SudaneseCity) => c.id === cityId);
+    if (!city) {
+      errors.cityId = 'مدينة غير صالحة أو غير مدعومة';
+    } else if (!city.active) {
+      errors.cityId = 'هذه المدينة غير متاحة حالياً';
+    } else {
+      // Check if shipping method is available for this city
+      const deliveryCost = DEFAULT_DELIVERY_COSTS.find(
+        cost => cost.cityId === cityId && cost.method === shippingMethod && cost.active
+      );
+      if (!deliveryCost) {
+        errors.cityId = `طريقة الشحن "${shippingMethod === 'land' ? 'البري' : 'البحري'}" غير متاحة لهذه المدينة`;
+      }
+    }
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  };
+};
+
+// Keep the old function for backward compatibility
 export const validateShippingFields = (
   shippingMethod: string,
   destinationCountry: string

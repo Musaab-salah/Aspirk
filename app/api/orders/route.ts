@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateShippingFields, calculateShippingCost, COUNTRIES } from '@/types'
+import { validateCityShippingFields, calculateShippingCost, SUDANESE_CITIES } from '@/types'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,12 +10,12 @@ export async function POST(request: NextRequest) {
       carInfo,
       totalEstimatedPrice,
       shippingMethod,
-      destinationCountry,
+      cityId,
       notes
     } = body
 
     // Server-side validation
-    const validation = validateShippingFields(shippingMethod, destinationCountry)
+    const validation = validateCityShippingFields(shippingMethod, cityId)
     
     if (!validation.isValid) {
       return NextResponse.json(
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate shipping cost
-    const shippingCost = calculateShippingCost(shippingMethod, destinationCountry)
+    const shippingCost = calculateShippingCost(shippingMethod, cityId, totalEstimatedPrice)
     
     if (!shippingCost.isAvailable) {
       return NextResponse.json(
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       shippingCost: shippingCost.baseCost,
       currency: 'SDG' as const,
       shippingMethod,
-      destinationCountry,
+      cityId,
       notes,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         order,
         shippingInfo: {
           method: shippingMethod,
-          country: COUNTRIES.find(c => c.code === destinationCountry)?.nameAr,
+          city: SUDANESE_CITIES.find(c => c.id === cityId)?.nameAr,
           cost: shippingCost.baseCost,
           estimatedDays: shippingCost.estimatedDays
         }
@@ -170,8 +170,8 @@ export async function GET(request: NextRequest) {
         totalAmount: 450,
         shippingCost: 85,
         currency: 'SDG',
-        shippingMethod: 'air',
-        destinationCountry: 'EG',
+        shippingMethod: 'land',
+        cityId: '1',
         notes: 'Need urgent delivery',
         adminNotes: '',
         createdAt: new Date('2024-01-15T10:30:00'),
@@ -204,8 +204,8 @@ export async function GET(request: NextRequest) {
         totalAmount: 320,
         shippingCost: 150,
         currency: 'SDG',
-        shippingMethod: 'air',
-        destinationCountry: 'NG',
+        shippingMethod: 'sea',
+        cityId: '4',
         notes: 'Standard delivery is fine',
         adminNotes: 'Approved after price verification',
         createdAt: new Date('2024-01-14T15:45:00'),
@@ -238,8 +238,8 @@ export async function GET(request: NextRequest) {
         totalAmount: 280,
         shippingCost: 100,
         currency: 'SDG',
-        shippingMethod: 'air',
-        destinationCountry: 'KE',
+        shippingMethod: 'land',
+        cityId: '16',
         notes: 'Budget constraint',
         adminNotes: 'Rejected due to unavailability of parts',
         createdAt: new Date('2024-01-13T09:15:00'),

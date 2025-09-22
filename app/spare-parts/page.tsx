@@ -182,11 +182,11 @@ export default function SparePartsPage() {
       alert('يرجى اختيار قطع الغيار المطلوبة قبل المتابعة')
       return
     }
-    // Navigate to order review page with enhanced data
+    // Navigate to shipping page with selected parts data
     const partsParam = selectedParts.map(p => p.partId).join(',')
     const quantitiesParam = selectedParts.map(p => p.quantity).join(',')
     const typesParam = selectedParts.map(p => p.type).join(',')
-    router.push(`/order-review?parts=${partsParam}&quantities=${quantitiesParam}&types=${typesParam}&brand=${brand}&model=${model}&year=${year}`)
+    router.push(`/shipping?parts=${partsParam}&quantities=${quantitiesParam}&types=${typesParam}&brand=${brand}&model=${model}&year=${year}`)
   }
 
   return (

@@ -10,7 +10,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
-import { Order, COUNTRIES } from '@/types'
+import { Order, SUDANESE_CITIES } from '@/types'
 import { processOrdersDates } from '@/utils/dateUtils'
 
 // Mock data - in real app this would come from API
@@ -24,8 +24,8 @@ const mockOrders: Order[] = [
     totalAmount: 450,
     shippingCost: 85,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'EG',
+    shippingMethod: 'land',
+    cityId: '1',
     notes: 'Need urgent delivery',
     adminNotes: '',
     createdAt: new Date('2024-01-15T10:30:00'),
@@ -58,8 +58,8 @@ const mockOrders: Order[] = [
     totalAmount: 320,
     shippingCost: 150,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'NG',
+    shippingMethod: 'sea',
+    cityId: '4',
     notes: 'Standard delivery is fine',
     adminNotes: 'Approved after price verification',
     createdAt: new Date('2024-01-14T15:45:00'),
@@ -92,8 +92,8 @@ const mockOrders: Order[] = [
     totalAmount: 280,
     shippingCost: 100,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'KE',
+    shippingMethod: 'land',
+    cityId: '16',
     notes: 'Budget constraint',
     adminNotes: 'Rejected due to unavailability of parts',
     createdAt: new Date('2024-01-13T09:15:00'),
@@ -495,13 +495,25 @@ export default function AdminOrdersPage() {
                 <div>
                   <span className="font-medium text-gray-700 font-arabic">طريقة الشحن:</span>
                   <span className="mr-2 font-arabic">
-                    {selectedOrder.shippingMethod === 'air' ? 'جوي' : 'بري'}
+                    {selectedOrder.shippingMethod === 'land' ? 'بري' : 'بحري'}
                   </span>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700 font-arabic">دولة الوجهة:</span>
+                  <span className="font-medium text-gray-700 font-arabic">الولاية:</span>
                   <span className="mr-2 font-arabic">
-                    {COUNTRIES.find(c => c.code === selectedOrder.destinationCountry)?.nameAr}
+                    {(() => {
+                      const city = SUDANESE_CITIES.find(c => c.id === selectedOrder.cityId)
+                      return city ? city.stateAr : 'غير محدد'
+                    })()}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700 font-arabic">المدينة:</span>
+                  <span className="mr-2 font-arabic">
+                    {(() => {
+                      const city = SUDANESE_CITIES.find(c => c.id === selectedOrder.cityId)
+                      return city ? city.nameAr : 'غير محدد'
+                    })()}
                   </span>
                 </div>
                 <div>

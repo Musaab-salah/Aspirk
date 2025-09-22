@@ -5,9 +5,10 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { CheckIcon, TruckIcon, ClockIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import ShippingForm from '@/components/ShippingForm'
+import CityShippingForm from '@/components/CityShippingForm'
+import ShippingDeliveryModal from '@/components/ShippingDeliveryModal'
 
-import { SparePart, validateShippingFields, calculateShippingCost, COUNTRIES, ExchangeRateConfig, calculateSDGPrice } from '@/types'
+import { SparePart, validateCityShippingFields, calculateShippingCost, SUDANESE_CITIES, ExchangeRateConfig, calculateSDGPrice } from '@/types'
 import { formatUserPrice } from '@/utils/priceUtils'
 
 // Mock data - in real app this would come from API
@@ -134,12 +135,13 @@ export default function RequestSummaryPage() {
     notes: ''
   })
   const [shippingMethod, setShippingMethod] = useState('')
-  const [destinationCountry, setDestinationCountry] = useState('')
+  const [cityId, setCityId] = useState('')
   const [validation, setValidation] = useState({ isValid: true, errors: {} })
   const [showValidation, setShowValidation] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [exchangeRate, setExchangeRate] = useState<ExchangeRateConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showShippingModal, setShowShippingModal] = useState(false)
 
   const partsParam = searchParams.get('parts')
   const brand = searchParams.get('brand')
@@ -195,21 +197,19 @@ export default function RequestSummaryPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate shipping fields
-    const shippingValidation = validateShippingFields(shippingMethod, destinationCountry)
-    setValidation(shippingValidation)
-    setShowValidation(true)
-    
+    // Validate required fields
     if (!customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       alert('يرجى ملء جميع الحقول المطلوبة')
       return
     }
 
-    if (!shippingValidation.isValid) {
-      return
-    }
+    // Show shipping modal instead of direct submission
+    setShowShippingModal(true)
+  }
 
+  const handleShippingConfirm = async (shippingMethod: string, cityId: string) => {
     setIsSubmitting(true)
+    setShowShippingModal(false)
 
     try {
       // Prepare request data
@@ -219,7 +219,7 @@ export default function RequestSummaryPage() {
         carInfo: { brand, model, year },
         totalEstimatedPrice,
         shippingMethod,
-        destinationCountry,
+        cityId,
         notes: customerInfo.notes
       }
 
@@ -318,24 +318,24 @@ export default function RequestSummaryPage() {
               </div>
 
               {/* Shipping Information Summary */}
-              {shippingMethod && destinationCountry && (
+              {shippingMethod && cityId && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2 font-arabic">معلومات الشحن</h4>
                   <div className="space-y-2 text-sm text-gray-600 font-arabic">
                     <div className="flex justify-between">
                       <span>طريقة الشحن:</span>
                       <span className="font-medium">
-                        {shippingMethod === 'air' ? 'الشحن الجوي' : 'الشحن البري'}
+                        {shippingMethod === 'land' ? 'الشحن البري' : 'الشحن البحري'}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>دولة الوجهة:</span>
+                      <span>المدينة:</span>
                       <span className="font-medium">
-                        {COUNTRIES.find(c => c.code === destinationCountry)?.nameAr}
+                        {SUDANESE_CITIES.find(c => c.id === cityId)?.nameAr}
                       </span>
                     </div>
                     {(() => {
-                      const shippingCost = calculateShippingCost(shippingMethod as 'air' | 'land', destinationCountry)
+                      const shippingCost = calculateShippingCost(shippingMethod as 'land' | 'sea', cityId, totalEstimatedPrice)
                       if (shippingCost.isAvailable) {
                         return (
                           <>
@@ -465,19 +465,16 @@ export default function RequestSummaryPage() {
                   />
                 </div>
 
-                {/* Shipping Information */}
+                {/* Note about shipping selection */}
                 <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 font-arabic">
-                    معلومات الشحن
-                  </h3>
-                  <ShippingForm
-                    shippingMethod={shippingMethod}
-                    setShippingMethod={setShippingMethod}
-                    destinationCountry={destinationCountry}
-                    setDestinationCountry={setDestinationCountry}
-                    validation={validation}
-                    showValidation={showValidation}
-                  />
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-2 font-arabic">
+                      معلومات الشحن
+                    </h3>
+                    <p className="text-blue-700 font-arabic text-sm">
+                      سيتم طلب اختيار طريقة الشحن والولاية في الخطوة التالية
+                    </p>
+                  </div>
                 </div>
 
                 <button
@@ -517,8 +514,17 @@ export default function RequestSummaryPage() {
           </div>
         </div>
       </div>
-
+      
       <Footer />
+
+      {/* Shipping Delivery Modal */}
+      <ShippingDeliveryModal
+        isOpen={showShippingModal}
+        onClose={() => setShowShippingModal(false)}
+        onConfirm={handleShippingConfirm}
+        selectedParts={selectedParts}
+        totalPrice={totalEstimatedPrice}
+      />
     </div>
   )
 }

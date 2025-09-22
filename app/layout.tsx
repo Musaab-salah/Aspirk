@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   title: 'SigmaPart - طلب قطع الغيار من الإمارات',
   description: 'اطلب قطع غيار سيارتك من اي مكان بكل سهولة وأمان. خدمة موثوقة وسريعة لجميع أنواع السيارات.',
   keywords: 'قطع غيار, سيارات, الإمارات, طلب قطع غيار, SigmaPart, UAE, car parts',
+  icons: {
+    icon: '/favicon.svg',
+  },
   authors: [{ name: 'SigmaPart' }],
 }
 

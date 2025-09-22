@@ -25,7 +25,7 @@ import {
   QuestionMarkCircleIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/outline'
-import { DashboardStats, Order, COUNTRIES, ExchangeRateConfig, validateExchangeRate } from '@/types'
+import { DashboardStats, Order, SUDANESE_CITIES, ExchangeRateConfig, validateExchangeRate } from '@/types'
 import AdminLogin from '@/components/AdminLogin'
 
 // Mock data - in real app this would come from API
@@ -60,8 +60,8 @@ const mockRecentOrders: Order[] = [
     totalAmount: 450,
     shippingCost: 50,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'EG',
+    shippingMethod: 'land',
+    cityId: '1',
     createdAt: new Date('2024-01-15T10:30:00'),
     updatedAt: new Date('2024-01-15T10:30:00'),
     customer: {
@@ -93,7 +93,7 @@ const mockRecentOrders: Order[] = [
     shippingCost: 40,
     currency: 'SDG',
     shippingMethod: 'land',
-    destinationCountry: 'NG',
+    cityId: '4',
     createdAt: new Date('2024-01-14T15:45:00'),
     updatedAt: new Date('2024-01-14T16:20:00'),
     customer: {
@@ -124,8 +124,8 @@ const mockRecentOrders: Order[] = [
     totalAmount: 280,
     shippingCost: 150,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'KE',
+    shippingMethod: 'sea',
+    cityId: '16',
     createdAt: new Date('2024-01-13T09:15:00'),
     updatedAt: new Date('2024-01-14T11:30:00'),
     customer: {
@@ -751,10 +751,10 @@ export default function AdminDashboard() {
                           </span>
                           <div className="text-xs text-gray-500 font-arabic">
                             <span className="ml-2">
-                              {order.shippingMethod === 'air' ? 'شحن جوي' : 'شحن بري'}
+                              {order.shippingMethod === 'land' ? 'شحن بري' : 'شحن بحري'}
                             </span>
                             <span>
-                              {COUNTRIES.find(c => c.code === order.destinationCountry)?.nameAr}
+                              {SUDANESE_CITIES.find(c => c.id === order.cityId)?.nameAr}
                             </span>
                           </div>
                         </div>

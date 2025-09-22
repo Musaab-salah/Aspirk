@@ -9,7 +9,7 @@ import {
   PlusIcon,
   EyeIcon,
 } from '@heroicons/react/24/outline'
-import { Order, COUNTRIES } from '@/types'
+import { Order, SUDANESE_CITIES } from '@/types'
 import { processOrdersDates } from '@/utils/dateUtils'
 
 // Mock data - in real app this would come from API
@@ -23,8 +23,8 @@ const mockUserOrders: Order[] = [
     totalAmount: 450,
     shippingCost: 85,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'EG',
+    shippingMethod: 'land',
+    cityId: '1',
     createdAt: new Date('2024-01-15T10:30:00'),
     updatedAt: new Date('2024-01-15T10:30:00'),
     customer: {
@@ -55,8 +55,8 @@ const mockUserOrders: Order[] = [
     totalAmount: 320,
     shippingCost: 150,
     currency: 'SDG',
-    shippingMethod: 'air',
-    destinationCountry: 'NG',
+    shippingMethod: 'sea',
+    cityId: '4',
     createdAt: new Date('2024-01-14T15:45:00'),
     updatedAt: new Date('2024-01-14T16:20:00'),
     customer: {
@@ -244,7 +244,7 @@ export default function UserOrdersPage() {
                         <div>
                           <span className="font-medium text-gray-700 font-arabic">الشحن:</span>
                           <span className="mr-2 font-arabic">
-                            {order.shippingMethod === 'air' ? 'جوي' : 'بري'} - {COUNTRIES.find(c => c.code === order.destinationCountry)?.nameAr}
+                            {order.shippingMethod === 'land' ? 'بري' : 'بحري'} - {SUDANESE_CITIES.find(c => c.id === order.cityId)?.nameAr}
                           </span>
                         </div>
                       </div>
@@ -303,13 +303,13 @@ export default function UserOrdersPage() {
                 <div>
                   <span className="font-medium text-gray-700 font-arabic">طريقة الشحن:</span>
                   <span className="mr-2 font-arabic">
-                    {selectedOrder.shippingMethod === 'air' ? 'جوي' : 'بري'}
+                    {selectedOrder.shippingMethod === 'land' ? 'بري' : 'بحري'}
                   </span>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700 font-arabic">دولة الوجهة:</span>
+                  <span className="font-medium text-gray-700 font-arabic">المدينة:</span>
                   <span className="mr-2 font-arabic">
-                    {COUNTRIES.find(c => c.code === selectedOrder.destinationCountry)?.nameAr}
+                    {SUDANESE_CITIES.find(c => c.id === selectedOrder.cityId)?.nameAr}
                   </span>
                 </div>
                 <div>

@@ -103,6 +103,7 @@ export default function CarSelector() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ابحث عن ماركة أو موديل..."
             className="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 font-arabic text-lg"
+            suppressHydrationWarning
           />
           <MagnifyingGlassIcon className="h-6 w-6 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
         </div>
@@ -118,6 +119,7 @@ export default function CarSelector() {
             type="button"
             onClick={() => setIsBrandOpen(!isBrandOpen)}
             className="w-full flex items-center justify-between px-4 py-4 border-2 border-gray-300 rounded-xl bg-white text-right focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 font-arabic hover:border-primary-300 transition-colors"
+            suppressHydrationWarning
           >
             <div className="flex items-center space-x-3 space-x-reverse">
               {selectedBrand && (
@@ -165,6 +167,7 @@ export default function CarSelector() {
                 ? 'border-gray-300 bg-white hover:border-primary-300 focus:border-primary-500' 
                 : 'border-gray-200 bg-gray-50 cursor-not-allowed'
             }`}
+            suppressHydrationWarning
           >
             <div className="flex items-center space-x-3 space-x-reverse">
               {selectedModel && (
@@ -212,6 +215,7 @@ export default function CarSelector() {
                 ? 'border-gray-300 bg-white hover:border-primary-300 focus:border-primary-500' 
                 : 'border-gray-200 bg-gray-50 cursor-not-allowed'
             }`}
+            suppressHydrationWarning
           >
             <span className={selectedYear ? 'text-gray-900' : 'text-gray-500'}>
               {selectedYear || 'اختر السنة'}
@@ -273,6 +277,7 @@ export default function CarSelector() {
           <button
             disabled
             className="px-8 py-4 bg-gray-300 text-gray-500 text-lg font-semibold rounded-2xl cursor-not-allowed font-arabic"
+            suppressHydrationWarning
           >
             اختر السيارة أولاً
           </button>

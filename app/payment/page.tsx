@@ -1,160 +1,107 @@
 'use client'
 
-import { useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { ArrowLeftIcon, CheckIcon, CreditCardIcon, BuildingLibraryIcon, BanknotesIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { 
+  TruckIcon, 
+  BuildingOfficeIcon, 
+  MapPinIcon, 
+  CheckIcon, 
+  ArrowLeftIcon,
+  CreditCardIcon,
+  BanknotesIcon,
+  ClockIcon
+} from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import ProgressStepper from '@/components/ProgressStepper'
+import StepNavigation from '@/components/StepNavigation'
+import Breadcrumb from '@/components/Breadcrumb'
+import { SparePartSelection, ShippingCost, PaymentMethod } from '@/types'
 
-interface PaymentMethod {
-  id: string
-  name: string
-  nameAr: string
-  description: string
-  descriptionAr: string
-  icon: React.ComponentType<{ className?: string }>
-  color: string
-  instructions: string[]
-  instructionsAr: string[]
+interface OrderData {
+  parts: SparePartSelection[]
+  shippingMethod: 'land' | 'sea'
+  state: string
+  city: string
+  shippingCost: ShippingCost
+  brand?: string
+  model?: string
+  year?: string
 }
 
-const paymentMethods: PaymentMethod[] = [
+// Hardcoded payment methods - will be manageable from Admin Panel later
+const PAYMENT_METHODS: PaymentMethod[] = [
   {
-    id: 'bankek',
-    name: 'Bankek',
-    nameAr: 'بنكك',
-    description: 'Pay via Bank of Khartoum app',
-    descriptionAr: 'ادفع عبر تطبيق بنك الخرطوم',
-    icon: BuildingLibraryIcon,
-    color: 'primary',
-    instructions: [
-      'Open Bankek app on your phone',
-      'Login to your Bank of Khartoum account',
-      'Select "Send Money" or "Transfer"',
-      'Enter our account details and amount',
-      'Include your order number in the description',
-      'Confirm the transfer and keep the receipt'
-    ],
-    instructionsAr: [
-      'افتح تطبيق بنكك على هاتفك',
-      'سجل دخول إلى حساب بنك الخرطوم',
-      'اختر "إرسال أموال" أو "تحويل"',
-      'أدخل تفاصيل حسابنا والمبلغ',
-      'أضف رقم طلبك في الوصف',
-      'أكد التحويل واحتفظ بالإيصال'
-    ]
+    id: 'bank-khartoum',
+    name: 'Bank of Khartoum',
+    nameAr: 'بنك الخرطوم',
+    description: 'Transfer to Bank of Khartoum account',
+    descriptionAr: 'تحويل إلى حساب بنك الخرطوم',
+    icon: '🏦',
+    accountNumber: '1234567890',
+    isActive: true
   },
   {
-    id: 'kashi',
-    name: 'Kashi',
-    nameAr: 'كاشي',
-    description: 'Pay via Omdurman National Bank app',
-    descriptionAr: 'ادفع عبر تطبيق البنك الوطني أم درمان',
-    icon: CreditCardIcon,
-    color: 'warning',
-    instructions: [
-      'Open Kashi app on your phone',
-      'Login to your Omdurman National Bank account',
-      'Select "Payments" or "Transfer"',
-      'Enter our bank details and payment amount',
-      'Add your order number in the reference field',
-      'Complete the payment and save the confirmation'
-    ],
-    instructionsAr: [
-      'افتح تطبيق كاشي على هاتفك',
-      'سجل دخول إلى حساب البنك الوطني أم درمان',
-      'اختر "المدفوعات" أو "تحويل"',
-      'أدخل تفاصيل البنك ومبلغ الدفع',
-      'أضف رقم طلبك في حقل المرجع',
-      'أكمل الدفع واحفظ التأكيد'
-    ]
+    id: 'omdurman-national',
+    name: 'Omdurman National Bank',
+    nameAr: 'بنك أم درمان الوطني',
+    description: 'Transfer to Omdurman National Bank account',
+    descriptionAr: 'تحويل إلى حساب بنك أم درمان الوطني',
+    icon: '🏛️',
+    accountNumber: '0987654321',
+    isActive: true
   },
   {
-    id: 'fawry',
-    name: 'Fawry',
-    nameAr: 'فوري',
-    description: 'Pay via Bank of Faisal app',
-    descriptionAr: 'ادفع عبر تطبيق بنك فيصل',
-    icon: BanknotesIcon,
-    color: 'success',
-    instructions: [
-      'Open Fawry app on your phone',
-      'Login to your Bank of Faisal account',
-      'Select "Pay Bills" or "Send Money"',
-      'Enter our account information and amount',
-      'Include your order number in the notes',
-      'Confirm payment and keep the receipt'
-    ],
-    instructionsAr: [
-      'افتح تطبيق فوري على هاتفك',
-      'سجل دخول إلى حساب بنك فيصل',
-      'اختر "دفع الفواتير" أو "إرسال أموال"',
-      'أدخل معلومات حسابنا والمبلغ',
-      'أضف رقم طلبك في الملاحظات',
-      'أكد الدفع واحتفظ بالإيصال'
-    ]
+    id: 'faisal-islamic',
+    name: 'Faisal Islamic Bank',
+    nameAr: 'بنك فيصل الإسلامي',
+    description: 'Transfer to Faisal Islamic Bank account',
+    descriptionAr: 'تحويل إلى حساب بنك فيصل الإسلامي',
+    icon: '🕌',
+    accountNumber: '1122334455',
+    isActive: true
   }
 ]
 
 export default function PaymentPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const [selectedMethod, setSelectedMethod] = useState<string>('')
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [orderData, setOrderData] = useState<OrderData | null>(null)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
-  // Get order data from URL params
-  const parts = searchParams.get('parts')
-  const quantities = searchParams.get('quantities')
-  const brand = searchParams.get('brand')
-  const model = searchParams.get('model')
-  const year = searchParams.get('year')
-  const quotationMethod = searchParams.get('quotationMethod')
-
-  // Progress steps
+  // Define the workflow steps
   const steps = [
     {
-      id: 'car-selection',
-      title: 'Car Selection',
+      id: 'home',
+      title: 'Home',
+      titleAr: 'الرئيسية',
+      icon: TruckIcon,
+      isCompleted: true,
+      isCurrent: false
+    },
+    {
+      id: 'select-car',
+      title: 'Select Car',
       titleAr: 'اختيار السيارة',
-      description: 'Choose your car',
-      descriptionAr: 'اختر سيارتك',
+      icon: TruckIcon,
       isCompleted: true,
       isCurrent: false
     },
     {
-      id: 'parts-selection',
-      title: 'Parts Selection',
-      titleAr: 'اختيار قطع الغيار',
-      description: 'Select spare parts',
-      descriptionAr: 'اختر قطع الغيار',
+      id: 'spare-parts',
+      title: 'Spare Parts',
+      titleAr: 'قطع الغيار',
+      icon: TruckIcon,
       isCompleted: true,
       isCurrent: false
     },
     {
-      id: 'order-review',
-      title: 'Order Review',
-      titleAr: 'مراجعة الطلب',
-      description: 'Review your order',
-      descriptionAr: 'راجع طلبك',
-      isCompleted: true,
-      isCurrent: false
-    },
-    {
-      id: 'login',
-      title: 'Login/Signup',
-      titleAr: 'تسجيل الدخول',
-      description: 'Login or create account',
-      descriptionAr: 'سجل دخول أو أنشئ حساب',
-      isCompleted: true,
-      isCurrent: false
-    },
-    {
-      id: 'quotation',
-      title: 'Request Quotation',
-      titleAr: 'طلب عرض سعر',
-      description: 'Get price quote',
-      descriptionAr: 'احصل على عرض السعر',
+      id: 'shipping',
+      title: 'Shipping',
+      titleAr: 'الشحن',
+      icon: TruckIcon,
       isCompleted: true,
       isCurrent: false
     },
@@ -162,143 +109,289 @@ export default function PaymentPage() {
       id: 'payment',
       title: 'Payment',
       titleAr: 'الدفع',
-      description: 'Complete payment',
-      descriptionAr: 'أكمل الدفع',
+      icon: CreditCardIcon,
       isCompleted: false,
       isCurrent: true
+    },
+    {
+      id: 'summary',
+      title: 'Summary',
+      titleAr: 'الملخص',
+      icon: TruckIcon,
+      isCompleted: false,
+      isCurrent: false
     }
   ]
 
-  const handleMethodSelect = (methodId: string) => {
-    setSelectedMethod(methodId)
+  useEffect(() => {
+    loadOrderData()
+  }, [])
+
+  const loadOrderData = () => {
+    try {
+      const storedData = sessionStorage.getItem('orderData')
+      if (storedData) {
+        const data = JSON.parse(storedData)
+        setOrderData(data)
+      } else {
+        // Redirect to spare parts if no data
+        router.push('/spare-parts')
+      }
+    } catch (error) {
+      console.error('Error loading order data:', error)
+      router.push('/spare-parts')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handlePayment = async () => {
-    if (!selectedMethod) {
-      alert('يرجى اختيار طريقة الدفع')
+  const handlePaymentMethodChange = (methodId: string) => {
+    setSelectedPaymentMethod(methodId)
+    setErrors(prev => ({ ...prev, paymentMethod: '' }))
+  }
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {}
+
+    if (!selectedPaymentMethod) {
+      newErrors.paymentMethod = 'يرجى اختيار طريقة الدفع'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
       return
     }
 
-    setIsProcessing(true)
+    setIsSubmitting(true)
 
     try {
-      // In real app, this would process the payment
-      console.log('Processing payment with method:', selectedMethod)
-      
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Navigate to success page
-      const params = new URLSearchParams()
-      if (parts) params.append('parts', parts)
-      if (quantities) params.append('quantities', quantities)
-      if (brand) params.append('brand', brand)
-      if (model) params.append('model', model)
-      if (year) params.append('year', year)
-      params.append('paymentMethod', selectedMethod)
-      
-      router.push(`/request-success?${params.toString()}`)
+      // Update order data with payment method
+      const selectedMethod = PAYMENT_METHODS.find(method => method.id === selectedPaymentMethod)
+      const updatedOrderData = {
+        ...orderData,
+        paymentMethod: selectedMethod
+      }
+
+      // Store updated data in session storage
+      sessionStorage.setItem('orderData', JSON.stringify(updatedOrderData))
+
+      // Redirect to summary page
+      router.push('/summary')
     } catch (error) {
-      console.error('Payment error:', error)
-      alert('حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى.')
+      console.error('Error processing payment form:', error)
+      setErrors({ submit: 'حدث خطأ في معالجة النموذج' })
     } finally {
-      setIsProcessing(false)
+      setIsSubmitting(false)
     }
   }
 
-  const handleBack = () => {
-    const params = new URLSearchParams()
-    if (parts) params.append('parts', parts)
-    if (quantities) params.append('quantities', quantities)
-    if (brand) params.append('brand', brand)
-    if (model) params.append('model', model)
-    if (year) params.append('year', year)
-    params.append('quotationMethod', quotationMethod || '')
-    
-    router.push(`/quotation?${params.toString()}`)
+  const calculateSubtotal = () => {
+    if (!orderData) return 0
+    return orderData.parts.reduce((total, selection) => 
+      total + (selection.part.prices[selection.type]?.sdg || 0) * selection.quantity, 0
+    )
   }
 
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal()
+    const shippingCost = orderData?.shippingCost?.baseCost || 0
+    return subtotal + shippingCost
+  }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (!orderData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4 font-arabic">
+              لا توجد بيانات طلب
+            </h1>
+            <p className="text-gray-600 mb-6 font-arabic">
+              يرجى العودة لاختيار قطع الغيار
+            </p>
+            <button
+              onClick={() => router.push('/spare-parts')}
+              className="btn-primary font-arabic"
+            >
+              العودة لقطع الغيار
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  const subtotal = calculateSubtotal()
+  const total = calculateTotal()
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {/* Progress Stepper */}
-      <ProgressStepper steps={steps} currentStep="payment" />
+      {/* Step Navigation */}
+      <StepNavigation currentStep="payment" steps={steps} />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { name: 'Select Car', nameAr: 'اختيار السيارة', href: '/' },
+            { name: 'Spare Parts', nameAr: 'قطع الغيار', href: '/spare-parts' },
+            { name: 'Shipping', nameAr: 'الشحن', href: '/shipping' },
+            { name: 'Payment', nameAr: 'الدفع', isCurrent: true }
+          ]} 
+        />
+        
         {/* Page Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center mb-4">
             <button
-              onClick={handleBack}
-              className="flex items-center space-x-2 space-x-reverse text-primary-600 hover:text-primary-700 font-arabic"
+              onClick={() => router.back()}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <ArrowLeftIcon className="h-5 w-5" />
-              <span>العودة لطلب عرض السعر</span>
+              <ArrowLeftIcon className="h-5 w-5 ml-2" />
+              <span className="font-arabic">العودة</span>
             </button>
-            
-            <div className="text-right">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2 font-arabic">
-                إتمام الدفع - السودان
-              </h1>
-              <p className="text-lg text-gray-600 font-arabic">
-                اختر طريقة الدفع المناسبة لك عبر تطبيقات البنوك السودانية
-              </p>
-            </div>
           </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-arabic">
+            طرق الدفع
+          </h1>
+          <p className="text-lg text-gray-600 font-arabic">
+            اختر طريقة الدفع المناسبة لك
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Payment Methods */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6 font-arabic">
-                طرق الدفع المتاحة في السودان
+          {/* Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 font-arabic">
+                ملخص الطلب
               </h2>
               
-              <div className="space-y-4">
-                {paymentMethods.map((method) => (
+              {/* Selected Parts */}
+              <div className="mb-4">
+                <h3 className="font-medium text-gray-900 mb-2 font-arabic">قطع الغيار المختارة</h3>
+                <div className="space-y-2">
+                  {orderData.parts.map((selection, index) => (
+                    <div key={index} className="text-sm text-gray-600 font-arabic">
+                      <span className="font-medium">{selection.part.nameAr}</span>
+                      <span className="mr-1">× {selection.quantity}</span>
+                      <span className="text-primary-600">
+                        {(selection.part.prices[selection.type]?.sdg || 0) * selection.quantity} جنيه
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shipping Info */}
+              <div className="mb-4">
+                <h3 className="font-medium text-gray-900 mb-2 font-arabic">معلومات الشحن</h3>
+                <div className="text-sm text-gray-600 font-arabic space-y-1">
+                  <div>الطريقة: {orderData.shippingMethod === 'land' ? 'بري' : 'بحري'}</div>
+                  <div>الوجهة: {orderData.city}</div>
+                  <div>الولاية: {orderData.state}</div>
+                </div>
+              </div>
+
+              {/* Cost Breakdown */}
+              <div className="border-t border-gray-200 pt-4">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 font-arabic">المجموع الفرعي:</span>
+                    <span className="font-medium">{subtotal} جنيه</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 font-arabic">تكلفة الشحن:</span>
+                    <span className="font-medium">
+                      {orderData.shippingCost.baseCost} جنيه
+                      {orderData.shippingCost.freeShippingThreshold && subtotal >= orderData.shippingCost.freeShippingThreshold && (
+                        <span className="text-green-600 text-xs mr-1">(مجاني)</span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-gray-900 font-arabic">المجموع الكلي:</span>
+                      <span className="font-bold text-primary-600">
+                        {orderData.shippingCost.freeShippingThreshold && subtotal >= orderData.shippingCost.freeShippingThreshold 
+                          ? subtotal 
+                          : total} جنيه
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Methods */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 font-arabic">
+                طرق الدفع المتاحة
+              </h2>
+
+              <div className="space-y-4 mb-6">
+                {PAYMENT_METHODS.filter(method => method.isActive).map((method) => (
                   <div
                     key={method.id}
-                    onClick={() => handleMethodSelect(method.id)}
-                    className={`relative p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                      selectedMethod === method.id
-                        ? `border-${method.color}-500 bg-${method.color}-50`
-                        : 'border-gray-200 hover:border-gray-300'
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedPaymentMethod === method.id
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-gray-300 hover:border-gray-400'
                     }`}
+                    onClick={() => handlePaymentMethodChange(method.id)}
                   >
-                    {selectedMethod === method.id && (
-                      <div className={`absolute top-4 right-4 w-6 h-6 bg-${method.color}-500 rounded-full flex items-center justify-center`}>
-                        <CheckIcon className="h-4 w-4 text-white" />
-                      </div>
-                    )}
-                    
-                    <div className="flex items-start space-x-4 space-x-reverse">
-                      <div className={`w-16 h-16 bg-${method.color}-100 rounded-2xl flex items-center justify-center flex-shrink-0`}>
-                        <method.icon className={`h-8 w-8 text-${method.color}-600`} />
-                      </div>
-                      
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={method.id}
+                        checked={selectedPaymentMethod === method.id}
+                        onChange={() => handlePaymentMethodChange(method.id)}
+                        className="sr-only"
+                      />
+                      <div className="text-3xl ml-4">{method.icon}</div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2 font-arabic">
+                        <h3 className="font-semibold text-gray-900 font-arabic">
                           {method.nameAr}
                         </h3>
-                        <p className="text-gray-600 font-arabic mb-4">
+                        <p className="text-sm text-gray-600 font-arabic">
                           {method.descriptionAr}
                         </p>
-                        
-                        {/* Payment Instructions */}
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-gray-800 font-arabic">تعليمات الدفع:</h4>
-                          <ul className="space-y-1">
-                            {method.instructionsAr.map((instruction, index) => (
-                              <li key={index} className="flex items-start space-x-2 space-x-reverse text-sm text-gray-600 font-arabic">
-                                <span className="w-2 h-2 bg-primary-600 rounded-full mt-2 flex-shrink-0"></span>
-                                <span>{instruction}</span>
-                              </li>
-                            ))}
-                          </ul>
+                        {method.accountNumber && (
+                          <p className="text-xs text-gray-500 font-arabic mt-1">
+                            رقم الحساب: {method.accountNumber}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="w-6 h-6 border-2 rounded-full flex items-center justify-center">
+                          {selectedPaymentMethod === method.id && (
+                            <div className="w-3 h-3 bg-primary-600 rounded-full"></div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -306,141 +399,57 @@ export default function PaymentPage() {
                 ))}
               </div>
 
-              {/* Sudan Bank Details */}
-              {selectedMethod && (
-                <div className="mt-6 p-6 bg-primary-50 rounded-2xl border border-primary-200">
-                  <h3 className="text-lg font-semibold text-primary-800 mb-4 font-arabic">
-                    تفاصيل الحساب البنكي في السودان
+              {errors.paymentMethod && (
+                <p className="mb-4 text-sm text-red-600 font-arabic">{errors.paymentMethod}</p>
+              )}
+
+              {/* Payment Instructions */}
+              {selectedPaymentMethod && (
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 mb-2 font-arabic">
+                    تعليمات الدفع
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-arabic">
-                    <div>
-                      <span className="text-primary-700">اسم البنك:</span>
-                      <span className="mr-2 font-semibold">بنك الخرطوم</span>
-                    </div>
-                    <div>
-                      <span className="text-primary-700">اسم الحساب:</span>
-                      <span className="mr-2 font-semibold">شركة قطع الغيار السودان</span>
-                    </div>
-                    <div>
-                      <span className="text-primary-700">رقم الحساب:</span>
-                      <span className="mr-2 font-semibold">1234567890</span>
-                    </div>
-                    <div>
-                      <span className="text-primary-700">IBAN:</span>
-                      <span className="mr-2 font-semibold">SD123456789012345678901</span>
-                    </div>
-                    <div>
-                      <span className="text-primary-700">Swift Code:</span>
-                      <span className="mr-2 font-semibold">BKHKSDAD</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-                    <p className="text-sm text-yellow-800 font-arabic text-center">
-                      💡 استخدم تطبيق البنك المحدد لإتمام عملية الدفع بسهولة وأمان
-                    </p>
+                  <div className="text-blue-800 text-sm font-arabic space-y-2">
+                    <p>1. قم بتحويل المبلغ إلى الحساب المحدد</p>
+                    <p>2. احتفظ بإيصال التحويل</p>
+                    <p>3. ستحتاج لإدخال رقم الإيصال في الخطوة التالية</p>
+                    <p>4. سيتم مراجعة طلبك وإرسال قطع الغيار بعد تأكيد الدفع</p>
                   </div>
                 </div>
               )}
 
-              {/* Payment Button */}
-              {selectedMethod && (
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={handlePayment}
-                    disabled={isProcessing}
-                    className={`w-full flex items-center justify-center space-x-2 space-x-reverse px-8 py-4 rounded-xl font-semibold font-arabic transition-all duration-300 ${
-                      isProcessing
-                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                        : 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
-                    }`}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>جاري معالجة الدفع...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>إتمام الدفع</span>
-                        <CheckIcon className="h-5 w-5" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Order Summary & Payment Info */}
-          <div className="space-y-6">
-            {/* Order Summary */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 font-arabic">
-                ملخص الطلب
-              </h3>
-              
-              {parts && (
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 font-arabic">عدد قطع الغيار:</span>
-                    <span className="font-semibold">{parts.split(',').length}</span>
-                  </div>
-                  
-                  {brand && model && year && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 font-arabic">السيارة:</span>
-                      <span className="font-semibold">تويوتا كورولا 2016</span>
-                    </div>
+              {/* Submit Button */}
+              <div className="flex justify-end space-x-4 space-x-reverse">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-arabic"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-arabic flex items-center"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
+                      جاري المعالجة...
+                    </>
+                  ) : (
+                    <>
+                      <CheckIcon className="h-4 w-4 ml-2" />
+                      متابعة إلى الملخص
+                    </>
                   )}
-                  
-                  {quotationMethod && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 font-arabic">طريقة الاستلام:</span>
-                      <span className="font-semibold">
-                        {quotationMethod === 'email' ? 'البريد الإلكتروني' : 
-                         quotationMethod === 'whatsapp' ? 'واتساب' : 'كلاهما'}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                </button>
+              </div>
+
+              {errors.submit && (
+                <p className="mt-4 text-sm text-red-600 font-arabic text-center">{errors.submit}</p>
               )}
-            </div>
-
-            {/* Payment Security */}
-            <div className="bg-gradient-to-r from-success-50 to-success-100 rounded-2xl p-6 border border-success-200">
-              <h3 className="text-lg font-semibold text-success-800 mb-4 font-arabic text-center">
-                🔒 أمان الدفع
-              </h3>
-              <div className="space-y-3 text-sm text-success-700 font-arabic">
-                <div className="flex items-start space-x-2 space-x-reverse">
-                  <span className="w-2 h-2 bg-success-600 rounded-full mt-2"></span>
-                  <span>جميع المعاملات آمنة ومشفرة</span>
-                </div>
-                <div className="flex items-start space-x-2 space-x-reverse">
-                  <span className="w-2 h-2 bg-success-600 rounded-full mt-2"></span>
-                  <span>بياناتك محمية ومؤمنة</span>
-                </div>
-                <div className="flex items-start space-x-2 space-x-reverse">
-                  <span className="w-2 h-2 bg-success-600 rounded-full mt-2"></span>
-                  <span>لا نخزن معلومات الدفع</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Support */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 font-arabic text-center">
-                تحتاج مساعدة في الدفع؟
-              </h3>
-              <p className="text-sm text-gray-600 font-arabic text-center mb-4">
-                فريق الدعم متاح لمساعدتك
-              </p>
-              <div className="space-y-2 text-sm text-gray-600 font-arabic">
-                <p>📧 payments@spareparts.sd</p>
-                <p>📱 +249 91 123 4567</p>
-                <p>💬 WhatsApp: +249 91 123 4567</p>
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
