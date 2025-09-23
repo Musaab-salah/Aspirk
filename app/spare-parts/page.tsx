@@ -113,9 +113,33 @@ export default function SparePartsPage() {
       isCurrent: true
     },
     {
-      id: 'confirm-order',
-      title: 'Confirm Order',
-      titleAr: 'تأكيد الطلب',
+      id: 'shipping',
+      title: 'Shipping',
+      titleAr: 'الشحن',
+      icon: TruckIcon,
+      isCompleted: false,
+      isCurrent: false
+    },
+    {
+      id: 'payment',
+      title: 'Payment',
+      titleAr: 'الدفع',
+      icon: TruckIcon,
+      isCompleted: false,
+      isCurrent: false
+    },
+    {
+      id: 'recipient',
+      title: 'Recipient',
+      titleAr: 'المستلم',
+      icon: TruckIcon,
+      isCompleted: false,
+      isCurrent: false
+    },
+    {
+      id: 'summary',
+      title: 'Summary',
+      titleAr: 'الملخص',
       icon: ClipboardDocumentCheckIcon,
       isCompleted: false,
       isCurrent: false

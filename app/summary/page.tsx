@@ -13,13 +13,21 @@ import {
   ClockIcon,
   UserIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import StepNavigation from '@/components/StepNavigation'
 import Breadcrumb from '@/components/Breadcrumb'
 import { SparePartSelection, ShippingCost, PaymentMethod } from '@/types'
+
+interface RecipientDetails {
+  fullName: string
+  phoneNumber: string
+  detailedAddress: string
+  additionalNotes?: string
+}
 
 interface OrderData {
   parts: SparePartSelection[]
@@ -28,6 +36,7 @@ interface OrderData {
   city: string
   shippingCost: ShippingCost
   paymentMethod: PaymentMethod
+  recipientDetails: RecipientDetails
   brand?: string
   model?: string
   year?: string
@@ -78,6 +87,14 @@ export default function SummaryPage() {
       title: 'Payment',
       titleAr: 'الدفع',
       icon: CreditCardIcon,
+      isCompleted: true,
+      isCurrent: false
+    },
+    {
+      id: 'recipient',
+      title: 'Recipient',
+      titleAr: 'المستلم',
+      icon: UserIcon,
       isCompleted: true,
       isCurrent: false
     },
@@ -159,6 +176,10 @@ export default function SummaryPage() {
     router.push('/payment')
   }
 
+  const handleEditRecipient = () => {
+    router.push('/recipient')
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -214,6 +235,7 @@ export default function SummaryPage() {
             { name: 'Spare Parts', nameAr: 'قطع الغيار', href: '/spare-parts' },
             { name: 'Shipping', nameAr: 'الشحن', href: '/shipping' },
             { name: 'Payment', nameAr: 'الدفع', href: '/payment' },
+            { name: 'Recipient', nameAr: 'المستلم', href: '/recipient' },
             { name: 'Summary', nameAr: 'الملخص', isCurrent: true }
           ]} 
         />
@@ -379,6 +401,64 @@ export default function SummaryPage() {
                     </p>
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* Recipient Information */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 font-arabic">
+                  معلومات المستلم
+                </h2>
+                <button
+                  onClick={handleEditRecipient}
+                  className="text-primary-600 hover:text-primary-700 font-arabic text-sm"
+                >
+                  تعديل
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="p-2 bg-primary-100 rounded-lg ml-3">
+                    <UserIcon className="h-5 w-5 text-primary-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 font-arabic">
+                      الاسم: {orderData.recipientDetails.fullName}
+                    </p>
+                    <p className="text-sm text-gray-600 font-arabic">
+                      الهاتف: {orderData.recipientDetails.phoneNumber}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start p-3 bg-gray-50 rounded-lg">
+                  <div className="p-2 bg-primary-100 rounded-lg ml-3">
+                    <MapPinIcon className="h-5 w-5 text-primary-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 font-arabic">
+                      العنوان:
+                    </p>
+                    <p className="text-sm text-gray-600 font-arabic">
+                      {orderData.recipientDetails.detailedAddress}
+                    </p>
+                  </div>
+                </div>
+                {orderData.recipientDetails.additionalNotes && (
+                  <div className="flex items-start p-3 bg-gray-50 rounded-lg">
+                    <div className="p-2 bg-primary-100 rounded-lg ml-3">
+                      <DocumentTextIcon className="h-5 w-5 text-primary-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 font-arabic">
+                        ملاحظات إضافية:
+                      </p>
+                      <p className="text-sm text-gray-600 font-arabic">
+                        {orderData.recipientDetails.additionalNotes}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

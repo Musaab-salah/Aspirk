@@ -85,6 +85,14 @@ export default function ShippingPage() {
       isCurrent: false
     },
     {
+      id: 'recipient',
+      title: 'Recipient',
+      titleAr: 'المستلم',
+      icon: TruckIcon,
+      isCompleted: false,
+      isCurrent: false
+    },
+    {
       id: 'summary',
       title: 'Summary',
       titleAr: 'الملخص',
