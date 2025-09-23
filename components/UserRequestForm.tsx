@@ -198,14 +198,15 @@ export default function UserRequestForm({ className = '' }: UserRequestFormProps
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">الاسم الكامل *</label>
-                <input
-                  type="text"
-                  value={customerInfo.name}
-                  onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
-                  className="form-input"
-                  placeholder="أدخل اسمك الكامل"
-                  required
-                />
+                  <input
+                    type="text"
+                    value={customerInfo.name}
+                    onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+                    className="form-input"
+                    placeholder="أدخل اسمك الكامل"
+                    required
+                    suppressHydrationWarning
+                  />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">البريد الإلكتروني *</label>

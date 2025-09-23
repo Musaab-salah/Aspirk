@@ -1,14 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { MagnifyingGlassIcon, TruckIcon, ShieldCheckIcon, ClockIcon, StarIcon, ArrowRightIcon, CheckCircleIcon, HomeIcon, WrenchScrewdriverIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, TruckIcon, ShieldCheckIcon, ClockIcon, StarIcon, ArrowRightIcon, CheckCircleIcon, HomeIcon, WrenchScrewdriverIcon, ClipboardDocumentCheckIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import CarSelector from '@/components/CarSelector'
 import StepNavigation from '@/components/StepNavigation'
+import PhotoUpload from '@/components/PhotoUpload'
+import { processImageForChassisNumber } from '@/utils/ocrUtils'
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [unifiedSearch, setUnifiedSearch] = useState('')
+  const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const [extractedText, setExtractedText] = useState('')
+  const [searchMode, setSearchMode] = useState<'text' | 'ocr'>('text')
+  const [error, setError] = useState('')
 
   // Define the workflow steps
   const steps = [
@@ -52,10 +58,56 @@ export default function HomePage() {
     console.log('Searching for:', searchQuery)
   }
 
+  const handleImageProcessed = async (imageData: string, extractedText?: string) => {
+    setIsProcessingImage(true)
+    setError('')
+    
+    try {
+      const result = await processImageForChassisNumber(imageData)
+      console.log('OCR Result:', result)
+      
+      // Always show extracted text for user to edit, even if not perfect
+      if (result.extractedText) {
+        console.log('Setting extracted text:', result.extractedText)
+        setExtractedText(result.extractedText)
+        setUnifiedSearch(result.extractedText)
+        setSearchMode('ocr')
+        setError('')
+        
+        // Show a helpful message if the chassis number wasn't perfectly detected
+        if (!result.chassisNumber) {
+          setError('تم استخراج النص من الصورة. يرجى مراجعة النص وتعديله إذا لزم الأمر.')
+        }
+      } else {
+        setError('لم يتم العثور على نص في الصورة. يرجى المحاولة مرة أخرى أو البحث يدوياً.')
+        setSearchMode('text')
+      }
+    } catch (error) {
+      console.error('Error processing image:', error)
+      setError('حدث خطأ أثناء معالجة الصورة. يرجى المحاولة مرة أخرى.')
+      setSearchMode('text')
+    } finally {
+      setIsProcessingImage(false)
+    }
+  }
+
+  const handleImageError = (errorMessage: string) => {
+    setError(errorMessage)
+    setIsProcessingImage(false)
+  }
+
   const handleUnifiedSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!unifiedSearch.trim()) {
-      alert('يرجى إدخال نص للبحث')
+    
+    // Check if we have search text from either manual input or OCR
+    const searchText = unifiedSearch.trim()
+    console.log('Search attempt - unifiedSearch:', unifiedSearch)
+    console.log('Search attempt - searchText:', searchText)
+    console.log('Search attempt - searchMode:', searchMode)
+    console.log('Search attempt - extractedText:', extractedText)
+    
+    if (!searchText) {
+      alert('يرجى إدخال نص للبحث أو التقط صورة')
       return
     }
     
@@ -67,7 +119,7 @@ export default function HomePage() {
     
     // Navigate to spare parts page with search query
     const searchParams = new URLSearchParams()
-    searchParams.append('search', unifiedSearch.trim())
+    searchParams.append('search', searchText)
     
     // You can also add car selection if available
     // if (selectedCar) {
@@ -203,28 +255,148 @@ export default function HomePage() {
                       بحث شامل
                     </h3>
                     <p className="text-gray-600 font-arabic">
-                      ابحث عن قطع الغيار باسمها أو برقم الشاسيه
+                      اختر إما الكتابة اليدوية أو التقط صورة لرقم الشاسيه أو القطعة
                     </p>
                   </div>
                   
                   <form onSubmit={handleUnifiedSearch} className="space-y-6">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={unifiedSearch}
-                        onChange={(e) => setUnifiedSearch(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault()
-                            handleUnifiedSearch(e as any)
-                          }
-                        }}
-                        placeholder="أدخل اسم القطعة أو رقم الشاسيه..."
-                        className="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-2xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 font-arabic text-center shadow-lg hover:shadow-xl transition-all duration-300"
-                      />
-                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                        <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
+                    {/* Option 1: Manual Input */}
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <h4 className="text-lg font-semibold text-gray-800 font-arabic mb-2">
+                          الخيار الأول: الكتابة اليدوية
+                        </h4>
                       </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={unifiedSearch}
+                          onChange={(e) => {
+                            setUnifiedSearch(e.target.value)
+                            setSearchMode('text')
+                          }}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              handleUnifiedSearch(e as any)
+                            }
+                          }}
+                        placeholder="أدخل اسم القطعة أو رقم الشاسيه يدوياً..."
+                        className={`w-full px-6 py-4 text-lg border-2 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-500/20 font-arabic text-center shadow-lg hover:shadow-xl transition-all duration-300 ${
+                          searchMode === 'ocr' && extractedText 
+                            ? 'border-primary-500 bg-primary-50' 
+                            : 'border-gray-300 focus:border-primary-500'
+                        }`}
+                        suppressHydrationWarning
+                        />
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                          <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
+                        </div>
+                        {unifiedSearch && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUnifiedSearch('')
+                              setSearchMode('text')
+                              setExtractedText('')
+                              setError('')
+                            }}
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            title="مسح البحث"
+                          >
+                            ✕
+                          </button>
+                        )}
+                        {searchMode === 'ocr' && extractedText && (
+                          <div className="absolute left-12 top-1/2 transform -translate-y-1/2">
+                            <span className="text-xs text-primary-600 font-arabic">📷</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Divider */}
+                    <div className="flex items-center">
+                      <div className="flex-1 border-t border-gray-300"></div>
+                      <span className="px-4 text-sm text-gray-500 font-arabic">أو</span>
+                      <div className="flex-1 border-t border-gray-300"></div>
+                    </div>
+                    
+                    {/* Option 2: Photo Upload */}
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <h4 className="text-lg font-semibold text-gray-800 font-arabic mb-2">
+                          الخيار الثاني: التقط صورة
+                        </h4>
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <PhotoUpload
+                          onImageProcessed={handleImageProcessed}
+                          onError={handleImageError}
+                          className="w-full max-w-md"
+                        />
+                        {isProcessingImage && (
+                          <div className="flex items-center text-sm text-primary-600 font-arabic mr-3">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 ml-2"></div>
+                            معالجة الصورة...
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* OCR Tips */}
+                      <div className="text-xs text-gray-500 font-arabic bg-gray-50 p-3 rounded-lg text-center">
+                        💡 نصيحة: تأكد من أن رقم الشاسيه أو رقم القطعة واضح في الصورة للحصول على أفضل النتائج
+                      </div>
+                      
+                      {/* OCR Result Indicator */}
+                      {searchMode === 'ocr' && extractedText && (
+                        <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <p className="text-sm text-primary-800 font-arabic mb-2">
+                                🔍 تم استخراج النص من الصورة:
+                              </p>
+                              <div className="bg-white p-3 rounded border border-primary-200">
+                                <p className="text-lg font-semibold text-gray-900 font-arabic">
+                                  {extractedText}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setSearchMode('text')
+                                setExtractedText('')
+                                setUnifiedSearch('')
+                                setError('')
+                              }}
+                              className="text-xs text-primary-600 hover:text-primary-800 font-arabic mr-2"
+                              title="العودة للبحث النصي"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <div className="text-xs text-primary-600 font-arabic">
+                            💡 يمكنك تعديل النص في حقل البحث أعلاه أو البحث مباشرة
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Error Message */}
+                      {error && (
+                        <div className={`p-3 rounded-lg ${
+                          error.includes('تم استخراج النص') 
+                            ? 'bg-yellow-50 border border-yellow-200' 
+                            : 'bg-red-50 border border-red-200'
+                        }`}>
+                          <p className={`text-sm font-arabic ${
+                            error.includes('تم استخراج النص') 
+                              ? 'text-yellow-800' 
+                              : 'text-red-800'
+                          }`}>
+                            {error}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -236,16 +408,21 @@ export default function HomePage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setUnifiedSearch('')}
+                        onClick={() => {
+                          setUnifiedSearch('')
+                          setSearchMode('text')
+                          setExtractedText('')
+                          setError('')
+                        }}
                         className="px-6 py-4 border-2 border-gray-300 text-gray-600 rounded-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 font-arabic shadow-lg hover:shadow-xl"
                       >
-                        مسح
+                        مسح الكل
                       </button>
                     </div>
                     
                     <div className="text-center">
                       <p className="text-sm text-gray-500 font-arabic">
-                        💡 يمكنك البحث بـ: اسم القطعة • رقم الشاسيه • رقم المحرك • كود القطعة
+                        💡 يمكنك الكتابة يدوياً أو التقط صورة - كلا الخيارين يعمل بشكل مستقل
                       </p>
                     </div>
                   </form>
@@ -327,7 +504,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-in fade-in duration-1000" style={{ animationDelay: `${(index + 1) * 200}ms` }}>
+              <div key={index} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-in fade-in" style={{ animationDelay: `${(index + 1) * 200}ms` }}>
                 <div className="flex items-center mb-6">
                   <div className={`w-16 h-16 bg-gradient-to-br from-${testimonial.color}-100 to-${testimonial.color}-200 rounded-2xl flex items-center justify-center shadow-lg`}>
                     <span className={`text-${testimonial.color}-600 font-bold text-xl`}>{testimonial.avatar}</span>

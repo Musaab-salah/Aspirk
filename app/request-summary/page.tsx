@@ -401,14 +401,15 @@ export default function RequestSummaryPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1 font-arabic">
                     الاسم الكامل *
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={customerInfo.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="form-input font-arabic"
-                    placeholder="أدخل اسمك الكامل"
-                  />
+                    <input
+                      type="text"
+                      required
+                      value={customerInfo.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="form-input font-arabic"
+                      placeholder="أدخل اسمك الكامل"
+                      suppressHydrationWarning
+                    />
                 </div>
 
                 <div>

@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FontLoader from '@/components/FontLoader'
+import HydrationFix from '@/components/HydrationFix'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -46,6 +47,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body className={`${inter.variable} ${notoSansArabic.variable} font-english`}>
         <FontLoader>
+          <HydrationFix />
           <div className="min-h-screen bg-gray-50 flex flex-col">
             <Header />
             <main className="flex-1 pt-20 lg:pt-24">

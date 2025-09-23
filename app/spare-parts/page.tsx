@@ -35,6 +35,8 @@ export default function SparePartsPage() {
   const [exchangeRate, setExchangeRate] = useState<ExchangeRateConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [searchMode, setSearchMode] = useState<'text' | 'chassis'>('text')
+  const [extractedChassisNumber, setExtractedChassisNumber] = useState('')
 
   const brand = searchParams.get('brand')
   const model = searchParams.get('model')
@@ -85,6 +87,7 @@ export default function SparePartsPage() {
       setIsLoading(false)
     }
   }
+
 
   // Define the workflow steps
   const steps = [
@@ -149,16 +152,30 @@ export default function SparePartsPage() {
   // Filter spare parts based on criteria
   const filteredParts = parts.filter(part => {
     const matchesCategory = !selectedCategory || part.category === selectedCategory
-    const matchesSearch = !searchQuery || 
-      part.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      part.nameAr.includes(searchQuery) ||
-      part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      part.descriptionAr?.includes(searchQuery) ||
-      part.partNumber?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesPrice = (!priceRange.min || (part.prices.commercial.sdg && part.prices.commercial.sdg >= parseInt(priceRange.min))) &&
                         (!priceRange.max || (part.prices.commercial.sdg && part.prices.commercial.sdg <= parseInt(priceRange.max)))
     const matchesAvailability = !showAvailableOnly || part.isAvailable
     const matchesCountry = !countryFilter || part.countryOfOrigin === countryFilter
+
+    let matchesSearch = true
+    if (searchQuery) {
+      if (searchMode === 'chassis') {
+        // For chassis number search, we need to check if the part is compatible with cars that have this chassis
+        // This would typically require a database lookup, but for now we'll do a simple text match
+        matchesSearch = (part.partNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+                       part.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       part.nameAr.includes(searchQuery) ||
+                       (part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+                       (part.descriptionAr?.includes(searchQuery) ?? false)
+      } else {
+        // Regular text search
+        matchesSearch = part.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       part.nameAr.includes(searchQuery) ||
+                       (part.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+                       (part.descriptionAr?.includes(searchQuery) ?? false) ||
+                       (part.partNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+      }
+    }
 
     return matchesCategory && matchesSearch && matchesPrice && matchesAvailability && matchesCountry
   })
@@ -264,24 +281,72 @@ export default function SparePartsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2 font-arabic">
                   البحث
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="ابحث عن قطع الغيار..."
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
-                    suppressHydrationWarning
-                  />
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      title="مسح البحث"
-                    >
-                      ✕
-                    </button>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value)
+                        setSearchMode('text')
+                      }}
+                      placeholder={searchMode === 'chassis' ? "رقم الشاسيه المستخرج من الصورة..." : "ابحث عن قطع الغيار..."}
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-arabic"
+                      suppressHydrationWarning
+                    />
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                    {searchQuery && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('')
+                          setSearchMode('text')
+                          setExtractedChassisNumber('')
+                        }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        title="مسح البحث"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Photo Upload Button - Moved to Homepage */}
+                  <div className="space-y-3">
+                    <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800 font-arabic">
+                        📷 ميزة البحث بالصورة متوفرة الآن في الصفحة الرئيسية
+                      </p>
+                      <p className="text-xs text-blue-600 font-arabic mt-1">
+                        يمكنك العودة للصفحة الرئيسية واستخدام ميزة البحث بالصورة
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Search Mode Indicator */}
+                  {searchMode === 'chassis' && extractedChassisNumber && (
+                    <div className="p-3 bg-primary-50 border border-primary-200 rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm text-primary-800 font-arabic">
+                            🔍 تم استخراج رقم الشاسيه: <span className="font-semibold">{extractedChassisNumber}</span>
+                          </p>
+                          <p className="text-xs text-primary-600 font-arabic mt-1">
+                            يمكنك تعديل رقم الشاسيه في حقل البحث أعلاه
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSearchMode('text')
+                            setExtractedChassisNumber('')
+                            setSearchQuery('')
+                          }}
+                          className="text-xs text-primary-600 hover:text-primary-800 font-arabic mr-2"
+                          title="العودة للبحث النصي"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -373,6 +438,8 @@ export default function SparePartsPage() {
                   setPriceRange({ min: '', max: '' })
                   setShowAvailableOnly(false)
                   setCountryFilter('')
+                  setSearchMode('text')
+                  setExtractedChassisNumber('')
                 }}
                 className="w-full px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 font-arabic"
               >
@@ -392,6 +459,9 @@ export default function SparePartsPage() {
                 {searchQuery && (
                   <p className="text-sm text-primary-600 font-arabic mt-1">
                     🔍 نتائج البحث عن: {searchQuery}
+                    {searchMode === 'chassis' && (
+                      <span className="text-xs text-primary-500 mr-2">(رقم الشاسيه)</span>
+                    )}
                   </p>
                 )}
               </div>
